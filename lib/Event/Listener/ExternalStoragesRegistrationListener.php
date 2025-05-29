@@ -25,27 +25,23 @@ declare(strict_types=1);
 
 namespace OCA\Cidgravity_Gateway\Event\Listener;
 
-use OCA\Files_External\Service\Backend\CidgravityBackendService;
-use OCA\Files_External\Service\Backend\CidgravityGatewayBackendService;
+use OCA\Files_External\Service\BackendService;
 use OCA\Cidgravity_Gateway\Service\ProviderService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 
 class ExternalStoragesRegistrationListener implements IEventListener {
-	/** @var CidgravityBackendService */
-	private $cidgravityBackendService;
-	/** @var CidgravityGatewayBackendService */
-	private $cidgravityGatewayBackendService;
+	/** @var BackendService */
+	private $backendService;
 	/** @var ProviderService */
 	private $backendProvider;
 
-	public function __construct(CidgravityBackendService $cidgravityBackendService, CidgravityGatewayBackendService $cidgravityGatewayBackendService, ProviderService $backendProvider) {
-		$this->cidgravityBackendService = $cidgravityBackendService;
-		$this->cidgravityGatewayBackendService = $cidgravityGatewayBackendService;
+	public function __construct(BackendService $backendService, ProviderService $backendProvider) {
+		$this->backendService = $backendService;
+		$this->backendProvider = $backendProvider;
 	}
 
 	public function handle(Event $event): void {
-		$this->cidgravityBackendService->registerBackendProvider($this->cidgravityBackendService);
-		$this->cidgravityGatewayBackendService->registerBackendProvider($this->cidgravityGatewayBackendService);
+		$this->backendService->registerBackendProvider($this->backendProvider);
 	}
 }
