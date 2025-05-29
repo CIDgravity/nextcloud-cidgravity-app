@@ -41,11 +41,16 @@ class ProviderService implements IBackendProvider {
 	 * @return Backend[]
 	 */
 	public function getBackends() {
-		$backend = new \OCA\Cidgravity_Gateway\Service\BackendService(
+		$cidgravityBackend = new \OCA\Cidgravity_Gateway\Service\Backend\CidgravityBackendService(
 			$this->lFactory->get('cidgravity'),
 			new Password($this->lFactory->get('files_external'))
 		);
 
-		return [ $backend ];
+		$cidgravityGatewayBackend = new \OCA\Cidgravity_Gateway\Service\Backend\CidgravityGatewayBackendService(
+			$this->lFactory->get('cidgravityGateway'),
+			new Password($this->lFactory->get('files_external'))
+		);
+
+		return [ $cidgravityBackend, $cidgravityGatewayBackend ];
 	}
 }
