@@ -37,11 +37,13 @@ class CidgravityBackendService extends Backend {
 			->setStorageClass('\OCA\Files_External\Lib\Storage\OwnCloud')
 			->setText($l->t('CIDgravity'))
 			->addParameters([
-				new DefinitionParameter('host', $l->t('URL')),
-				(new DefinitionParameter('root', $l->t('Remote subfolder')))
-					->setFlag(DefinitionParameter::FLAG_OPTIONAL),
+				(new DefinitionParameter('host', $l->t('URL')))
+					->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					->setType(DefinitionParameter::VALUE_TEXT)
+					->setDefaultValue("https://nextcloud-2.florianruen.fr"),
 				(new DefinitionParameter('secure', $l->t('Secure https://')))
 					->setType(DefinitionParameter::VALUE_BOOLEAN)
+					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setDefaultValue(true),
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_PASSWORD)
