@@ -28,9 +28,10 @@ use OCA\Files_External\Lib\Auth\AuthMechanism;
 use OCA\Files_External\Lib\Auth\Password\Password;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCP\IL10N;
+use OCP\IConfig;
 
 class CidgravityBackendService extends Backend {
-	public function __construct(IL10N $l, Password $legacyAuth) {
+	public function __construct(IL10N $l, Password $legacyAuth, private IConfig $config) {
 		$this
 			->setIdentifier('cidgravity')
 			->addIdentifierAlias('\OC\Files\Storage\OwnCloud')
@@ -40,11 +41,11 @@ class CidgravityBackendService extends Backend {
 				(new DefinitionParameter('host', $l->t('URL')))
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setType(DefinitionParameter::VALUE_TEXT)
-					->setDefaultValue("https://nextcloud-2.florianruen.fr"),
+					->setDefaultValue($config->getSystemValue('cidgravity')['default_host']),
 				(new DefinitionParameter('secure', $l->t('Secure https://')))
 					->setType(DefinitionParameter::VALUE_BOOLEAN)
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
-					->setDefaultValue(true),
+					->setDefaultValue($config->getSystemValue('cidgravity')['default_ssl_enabled']),
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_PASSWORD)
 			->setLegacyAuthMechanism($legacyAuth);

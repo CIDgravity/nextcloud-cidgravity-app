@@ -60,21 +60,40 @@ class ExternalStorageService {
         try {
             $externalStorageConfiguration = $this->getExternalStorageConfigurationForSpecificFile($nextcloudUser, $fileId, true);
 
+            // Depending the external storage style, the request endpoint and method can change
+            // cidgravity (using another nextcloud): GET on another nextcloud API link
+            // cidgravityGateway (using webdav): POST on metadata_endpoint URL
             if (!isset($externalStorageConfiguration['error'])) {
-                $requestBody = [
-                    "verbose" => true,
-                    "filePath" => $externalStorageConfiguration['filepath'],
-                ];
+                $response = null;
 
-                // TODO: update metadata_endpoint to use different url if cidgravity storage instead of cidgravityGateway
-                $response = $this->httpClient->post(
-                    $externalStorageConfiguration['metadata_endpoint'], 
-                    $requestBody,
-                    $externalStorageConfiguration['ssl_enabled'],
-                    $externalStorageConfiguration['user'],
-                    $externalStorageConfiguration['password'],
-                );
+                if ($externalStorageConfiguration['is_cidgravity_gateway']) {
+                    $requestBody = [
+                        "verbose" => true,
+                        "filePath" => $externalStorageConfiguration['filepath'],
+                    ];
 
+                    $response = $this->httpClient->post(
+                        $externalStorageConfiguration['metadata_endpoint'], 
+                        $requestBody,
+                        $externalStorageConfiguration['ssl_enabled'],
+                        $externalStorageConfiguration['user'],
+                        $externalStorageConfiguration['password'],
+                    );
+
+                } else if($externalStorageConfiguration['is_cidgravity']) {
+                    $response = $this->httpClient->get(
+                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-file-metadata?fileId=" . $fileId, 
+                        $externalStorageConfiguration['ssl_enabled'],
+                        $externalStorageConfiguration['user'],
+                        $externalStorageConfiguration['password'],
+                    );
+
+                } else {
+                    return ['success' => false, 'error' => 'unable to find external storage type to send metadata request'];
+                }
+
+               // Handle the response. Format will be exactly the same, because when hitting nextcloud API
+               // hit a metadata endpoint. So same response, same format for both routes
                 if ($response['success']) {
                     return ['success' => true, 'metadata' => $response['result']];
                 } else {
@@ -98,6 +117,10 @@ class ExternalStorageService {
 	 * @throws Exception
 	 */
     public function getExternalStorageConfigurationForSpecificFile(IUser $nextcloudUser, int $fileId, bool $includeSensitiveSettings): array {
+        
+        // TODO: for external storage cidgravity, I guess we need to forward this call to the external storage nextcloud
+        // TODO: otherwise, we will return wrong info (related to IPFS gateway etc...)
+        // TODO: so we need send a GET to specific url (other OCS nextcloud) call and respond with this one
         try {
             $mountsForFile = $this->userMountCache->getMountsForFileId($fileId, $nextcloudUser->getUID());
 
@@ -110,15 +133,15 @@ class ExternalStorageService {
 
             // check external storage type is a CIDgravity storage (works for cidgravityGateway or cidgravity types)
             // if not, it means storage not found (for our use case)
-            if ($externalStorage->getBackend()->getIdentifier() != "cidgravityGateway" || $externalStorage->getBackend()->getIdentifier() != "cidgravity") {
-                return ['message' => 'external storage type for file ' . $fileId . ' is not a cidgravity storage', 'error' => 'external_storage_invalid_type'];
+            if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway" || $externalStorage->getBackend()->getIdentifier() == "cidgravity") {
+                if ($includeSensitiveSettings) {
+                    return $this->buildExternalStorageConfiguration($mountsForFile[0]->getInternalPath(), $externalStorage, $includeSensitiveSettings);
+                }
+
+                return $this->buildLightExternalStorageConfiguration($externalStorage);
             }
 
-            if ($includeSensitiveSettings) {
-                return $this->buildExternalStorageConfiguration($mountsForFile[0]->getInternalPath(), $externalStorage, $includeSensitiveSettings);
-            }
-
-            return $this->buildLightExternalStorageConfiguration($externalStorage);
+            return ['message' => 'external storage type for file ' . $fileId . ' is not a cidgravity storage', 'error' => 'external_storage_invalid_type'];
 
         } catch (Exception $e) {
             return ['message' => 'error getting external storage config', 'error' => $e->getMessage()];
@@ -149,6 +172,15 @@ class ExternalStorageService {
         if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
             $configuration['metadata_endpoint'] = $externalStorage->getBackendOption('metadata_endpoint');
             $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
+
+            // resolve the remote subfolder config (if it contains $user, will be automatically replaced by userID)
+            // this will help when sending metadata request to API endpoint
+            $resolvedMountpoint = $this->userConfigHandler->handle($externalStorage->getBackendOption('root'));
+
+            // if the mountpoint is not empty, prepend a slash
+            $mountpoint = trim($resolvedMountpoint, '/');
+            $filename = ltrim($fileInternalPath, '/');
+            $configuration['filepath'] = $mountpoint !== '' ? ($filename !== '' ? "/$mountpoint/$filename" : "/$mountpoint") : "/$filename";
         }
 
         // check if we need to include auth settings (for metadata call only, not exposed to frontend)
@@ -156,16 +188,6 @@ class ExternalStorageService {
             $configuration['user'] = $externalStorage->getBackendOption('user');
             $configuration['password'] = $externalStorage->getBackendOption('password');
         }
-
-        // TODO: maybe need to update this code to make it works with cidgravity external storage?
-        // resolve the remote subfolder config (if it contains $user, will be automatically replaced by userID)
-        // this will help when sending metadata request to API endpoint
-        $resolvedMountpoint = $this->userConfigHandler->handle($externalStorage->getBackendOption('root'));
-
-        // if the mountpoint is not empty, prepend a slash
-        $mountpoint = trim($resolvedMountpoint, '/');
-        $filename = ltrim($fileInternalPath, '/');
-        $configuration['filepath'] = $mountpoint !== '' ? ($filename !== '' ? "/$mountpoint/$filename" : "/$mountpoint") : "/$filename";
 
         return $configuration;
     }
@@ -177,11 +199,13 @@ class ExternalStorageService {
 	*/
     private function buildLightExternalStorageConfiguration(StorageConfig $externalStorage): array {
         $configuration = [];
-        $configuration['is_cidgravity_gateway'] = $externalStorage->getBackend()->getIdentifier() == "cidgravityGateway";
+
+        $isCidgravityGateway = $externalStorage->getBackend()->getIdentifier() == "cidgravityGateway";
+        $configuration['is_cidgravity_gateway'] = $isCidgravityGateway;
         $configuration['is_cidgravity'] = $externalStorage->getBackend()->getIdentifier() == "cidgravity";
 
         // available only for cidgravityGateway external storage
-        if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
+        if ($isCidgravityGateway) {
             $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
         }
 
