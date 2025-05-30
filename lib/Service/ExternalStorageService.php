@@ -117,10 +117,6 @@ class ExternalStorageService {
 	 * @throws Exception
 	 */
     public function getExternalStorageConfigurationForSpecificFile(IUser $nextcloudUser, int $fileId, bool $includeSensitiveSettings): array {
-        
-        // TODO: for external storage cidgravity, I guess we need to forward this call to the external storage nextcloud
-        // TODO: otherwise, we will return wrong info (related to IPFS gateway etc...)
-        // TODO: so we need send a GET to specific url (other OCS nextcloud) call and respond with this one
         try {
             $mountsForFile = $this->userMountCache->getMountsForFileId($fileId, $nextcloudUser->getUID());
 
@@ -130,12 +126,39 @@ class ExternalStorageService {
 
             // get configuration for external storage from ID
             $externalStorage = $this->globalStoragesService->getStorage($mountsForFile[0]->getMountId());
+            $externalStorageConfiguration = $this->buildExternalStorageConfiguration($mountsForFile[0]->getInternalPath(), $externalStorage, true);
 
-            // check external storage type is a CIDgravity storage (works for cidgravityGateway or cidgravity types)
-            // if not, it means storage not found (for our use case)
-            if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway" || $externalStorage->getBackend()->getIdentifier() == "cidgravity") {
+            // if external storage is set to cidgravity, it means we need to forward the call to another endpoint (nextcloud)
+            // otherwise we can't get all infos
+            if ($externalStorage->getBackend()->getIdentifier() == "cidgravity") {
+                $this->logger->error("CIDgravity - Get external storage config: forward to another nextcloud", [
+                    "externalStorageConfiguration" => json_encode($externalStorageConfiguration),
+                ]);
+
+                $response = $this->httpClient->get(
+                    $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-external-storage-config?fileId=" . $fileId, 
+                    $externalStorageConfiguration['ssl_enabled'],
+                    $externalStorageConfiguration['user'],
+                    $externalStorageConfiguration['password'],
+                );
+
+                if (!isset($response['error'])) {
+                    $this->logger->error("CIDgravity - Get external storage config: got response", [
+                        "response" => json_encode($response),
+                    ]);
+
+                    return $response['configuration'];
+                }
+                
+                $this->logger->error("CIDgravity - Get external storage config: got error", [
+                    "error" => json_encode($response['error']),
+                ]);
+
+                return ['message' => 'unable to get remote gateway config', 'error' => $response['error']];
+
+            } else if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
                 if ($includeSensitiveSettings) {
-                    return $this->buildExternalStorageConfiguration($mountsForFile[0]->getInternalPath(), $externalStorage, $includeSensitiveSettings);
+                    return $externalStorageConfiguration;
                 }
 
                 return $this->buildLightExternalStorageConfiguration($externalStorage);
