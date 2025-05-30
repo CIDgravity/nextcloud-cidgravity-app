@@ -57,8 +57,8 @@ class UserCreatedListener implements IEventListener
         $externalStorages = $this->globalStoragesService->getStorages();
 
         foreach ($externalStorages as $externalStorage) {
-            if ($externalStorage->getBackend()->getIdentifier() != "cidgravity") {
-                $this->logger->debug("CIDgravity - UserCreatedEvent: external storage not of type cidgravity", [
+            if ($externalStorage->getBackend()->getIdentifier() != "cidgravityGateway") {
+                $this->logger->debug("CIDgravity - UserCreatedEvent: external storage not of type cidgravityGateway", [
                     "externalStorage" => json_encode($externalStorage),
                     "user" => json_encode($event->getUser())
                 ]);

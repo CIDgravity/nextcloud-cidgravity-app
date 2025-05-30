@@ -66,6 +66,7 @@ class ExternalStorageService {
                     "filePath" => $externalStorageConfiguration['filepath'],
                 ];
 
+                // TODO: update metadata_endpoint to use different url if cidgravity storage instead of cidgravityGateway
                 $response = $this->httpClient->post(
                     $externalStorageConfiguration['metadata_endpoint'], 
                     $requestBody,
@@ -107,9 +108,9 @@ class ExternalStorageService {
             // get configuration for external storage from ID
             $externalStorage = $this->globalStoragesService->getStorage($mountsForFile[0]->getMountId());
 
-            // check external storage type is a CIDgravity storage
+            // check external storage type is a CIDgravity storage (works for cidgravityGateway or cidgravity types)
             // if not, it means storage not found (for our use case)
-            if ($externalStorage->getBackend()->getIdentifier() != "cidgravity") {
+            if ($externalStorage->getBackend()->getIdentifier() != "cidgravityGateway" || $externalStorage->getBackend()->getIdentifier() != "cidgravity") {
                 return ['message' => 'external storage type for file ' . $fileId . ' is not a cidgravity storage', 'error' => 'external_storage_invalid_type'];
             }
 
@@ -137,14 +138,26 @@ class ExternalStorageService {
 	*/
     private function buildExternalStorageConfiguration(string $fileInternalPath, StorageConfig $externalStorage, bool $includeAuthSettings): array {
         $configuration = [];
+        $configuration['is_cidgravity_gateway'] = $externalStorage->getBackend()->getIdentifier() == "cidgravityGateway";
         $configuration['is_cidgravity'] = $externalStorage->getBackend()->getIdentifier() == "cidgravity";
         $configuration['id'] = $externalStorage->getId();
         $configuration['host'] = $externalStorage->getBackendOption('host');
         $configuration['mountpoint'] = $externalStorage->getMountPoint();
-        $configuration['metadata_endpoint'] = $externalStorage->getBackendOption('metadata_endpoint');
-        $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
         $configuration['ssl_enabled'] = $externalStorage->getBackendOption('secure');
         
+        // available only for cidgravityGateway external storage
+        if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
+            $configuration['metadata_endpoint'] = $externalStorage->getBackendOption('metadata_endpoint');
+            $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
+        }
+
+        // check if we need to include auth settings (for metadata call only, not exposed to frontend)
+        if ($includeAuthSettings) {
+            $configuration['user'] = $externalStorage->getBackendOption('user');
+            $configuration['password'] = $externalStorage->getBackendOption('password');
+        }
+
+        // TODO: maybe need to update this code to make it works with cidgravity external storage?
         // resolve the remote subfolder config (if it contains $user, will be automatically replaced by userID)
         // this will help when sending metadata request to API endpoint
         $resolvedMountpoint = $this->userConfigHandler->handle($externalStorage->getBackendOption('root'));
@@ -153,12 +166,6 @@ class ExternalStorageService {
         $mountpoint = trim($resolvedMountpoint, '/');
         $filename = ltrim($fileInternalPath, '/');
         $configuration['filepath'] = $mountpoint !== '' ? ($filename !== '' ? "/$mountpoint/$filename" : "/$mountpoint") : "/$filename";
-
-        // check if we need to include auth settings (for metadata call only, not exposed to frontend)
-        if ($includeAuthSettings) {
-            $configuration['user'] = $externalStorage->getBackendOption('user');
-            $configuration['password'] = $externalStorage->getBackendOption('password');
-        }
 
         return $configuration;
     }
@@ -170,8 +177,14 @@ class ExternalStorageService {
 	*/
     private function buildLightExternalStorageConfiguration(StorageConfig $externalStorage): array {
         $configuration = [];
+        $configuration['is_cidgravity_gateway'] = $externalStorage->getBackend()->getIdentifier() == "cidgravityGateway";
         $configuration['is_cidgravity'] = $externalStorage->getBackend()->getIdentifier() == "cidgravity";
-        $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
+
+        // available only for cidgravityGateway external storage
+        if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
+            $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
+        }
+
         return $configuration;
     }
 }
