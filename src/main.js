@@ -27,7 +27,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 			return axios.get(url)
 				.then(response => {
-					if (response.data.success && response.data.configuration.is_cidgravity) {
+					if (response.data.success && (response.data.configuration.is_cidgravity || response.data.configuration.is_cidgravity_gateway)) {
 						return {
 							isCidgravityStorage: true,
 							configuration: response.data.configuration,
