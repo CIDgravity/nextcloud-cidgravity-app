@@ -46,27 +46,21 @@ class ProviderService implements IBackendProvider {
 	 * @return Backend[]
 	 */
 	public function getBackends() {
-		$backends = [];
+		$cidgravityBackend = new \OCA\Cidgravity_Gateway\Service\Backend\CidgravityBackendService(
+			$this->lFactory->get('cidgravity'),
+			new Password($this->lFactory->get('files_external'))
+		);
 
-		// Enable only this external storage backend if config is set in nextcloud config file
-		// Both storage can't be enabled at the same time (cidgravity or cidgravityGateway depending on config file)
-		if ($this->lconfig->getSystemValue('cidgravity')['gateway_enabled']) {
+		$backends = [ $cidgravityBackend ];
+
+		// Enable CIDgravityGateway external storage only if config is set
+		if ($this->lconfig->getSystemValue('cidgravity_gateway_exterrnal_storage_enabled')) {
 			$cidgravityGatewayBackend = new \OCA\Cidgravity_Gateway\Service\Backend\CidgravityGatewayBackendService(
 				$this->lFactory->get('cidgravityGateway'),
-				new Password($this->lFactory->get('files_external')),
-				$this->lconfig
+				new Password($this->lFactory->get('files_external'))
 			);
 
 			array_push($backends, $cidgravityGatewayBackend);
-
-		} else {
-			$cidgravityBackend = new \OCA\Cidgravity_Gateway\Service\Backend\CidgravityBackendService(
-				$this->lFactory->get('cidgravity'),
-				new Password($this->lFactory->get('files_external')),
-				$this->lconfig
-			);
-
-			array_push($backends, $cidgravityBackend);
 		}
 
 		return $backends;

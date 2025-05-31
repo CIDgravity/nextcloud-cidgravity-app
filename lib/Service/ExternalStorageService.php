@@ -126,39 +126,12 @@ class ExternalStorageService {
 
             // get configuration for external storage from ID
             $externalStorage = $this->globalStoragesService->getStorage($mountsForFile[0]->getMountId());
-            $externalStorageConfiguration = $this->buildExternalStorageConfiguration($mountsForFile[0]->getInternalPath(), $externalStorage, true);
 
-            // if external storage is set to cidgravity, it means we need to forward the call to another endpoint (nextcloud)
-            // otherwise we can't get all infos
-            if ($externalStorage->getBackend()->getIdentifier() == "cidgravity") {
-                $this->logger->error("CIDgravity - Get external storage config: forward to another nextcloud", [
-                    "externalStorageConfiguration" => json_encode($externalStorageConfiguration),
-                ]);
-
-                $response = $this->httpClient->get(
-                    $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-external-storage-config?fileId=" . $fileId, 
-                    $externalStorageConfiguration['ssl_enabled'],
-                    $externalStorageConfiguration['user'],
-                    $externalStorageConfiguration['password'],
-                );
-
-                if (!isset($response['error'])) {
-                    $this->logger->error("CIDgravity - Get external storage config: got response", [
-                        "response" => json_encode($response),
-                    ]);
-
-                    return $response['configuration'];
-                }
-                
-                $this->logger->error("CIDgravity - Get external storage config: got error", [
-                    "error" => json_encode($response['error']),
-                ]);
-
-                return ['message' => 'unable to get remote gateway config', 'error' => $response['error']];
-
-            } else if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
+            // check external storage type is a CIDgravity storage (works for cidgravityGateway or cidgravity types)
+            // if not, it means storage not found (for our use case)
+            if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway" || $externalStorage->getBackend()->getIdentifier() == "cidgravity") {
                 if ($includeSensitiveSettings) {
-                    return $externalStorageConfiguration;
+                    return $this->buildExternalStorageConfiguration($mountsForFile[0]->getInternalPath(), $externalStorage, $includeSensitiveSettings);
                 }
 
                 return $this->buildLightExternalStorageConfiguration($externalStorage);
@@ -190,11 +163,11 @@ class ExternalStorageService {
         $configuration['host'] = $externalStorage->getBackendOption('host');
         $configuration['mountpoint'] = $externalStorage->getMountPoint();
         $configuration['ssl_enabled'] = $externalStorage->getBackendOption('secure');
-        
+        $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
+
         // available only for cidgravityGateway external storage
         if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
             $configuration['metadata_endpoint'] = $externalStorage->getBackendOption('metadata_endpoint');
-            $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
 
             // resolve the remote subfolder config (if it contains $user, will be automatically replaced by userID)
             // this will help when sending metadata request to API endpoint
@@ -226,11 +199,7 @@ class ExternalStorageService {
         $isCidgravityGateway = $externalStorage->getBackend()->getIdentifier() == "cidgravityGateway";
         $configuration['is_cidgravity_gateway'] = $isCidgravityGateway;
         $configuration['is_cidgravity'] = $externalStorage->getBackend()->getIdentifier() == "cidgravity";
-
-        // available only for cidgravityGateway external storage
-        if ($isCidgravityGateway) {
-            $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
-        }
+        $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
 
         return $configuration;
     }

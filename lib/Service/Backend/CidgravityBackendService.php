@@ -28,10 +28,9 @@ use OCA\Files_External\Lib\Auth\AuthMechanism;
 use OCA\Files_External\Lib\Auth\Password\Password;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCP\IL10N;
-use OCP\IConfig;
 
 class CidgravityBackendService extends Backend {
-	public function __construct(IL10N $l, Password $legacyAuth, private IConfig $config) {
+	public function __construct(IL10N $l, Password $legacyAuth) {
 		$this
 			->setIdentifier('cidgravity')
 			->addIdentifierAlias('\OC\Files\Storage\OwnCloud')
@@ -41,11 +40,15 @@ class CidgravityBackendService extends Backend {
 				(new DefinitionParameter('host', $l->t('URL')))
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setType(DefinitionParameter::VALUE_TEXT)
-					->setDefaultValue($config->getSystemValue('cidgravity')['default_host']),
+					->setDefaultValue("https://nextcloud.twinquasar.io"),
 				(new DefinitionParameter('secure', $l->t('Secure https://')))
 					->setType(DefinitionParameter::VALUE_BOOLEAN)
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
-					->setDefaultValue($config->getSystemValue('cidgravity')['default_ssl_enabled']),
+					->setDefaultValue(true),
+				(new DefinitionParameter('default_ipfs_gateway', $l->t('Default IPFS gateway URL')))
+					->setType(DefinitionParameter::VALUE_TEXT)
+					->setDefaultValue("https://ipfs.io/ipfs")
+					->setTooltip('You can also use your custom gateway or public gateway such as https://dweb.link'),
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_PASSWORD)
 			->setLegacyAuthMechanism($legacyAuth);

@@ -28,10 +28,9 @@ use OCA\Files_External\Lib\Auth\AuthMechanism;
 use OCA\Files_External\Lib\Auth\Password\Password;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCP\IL10N;
-use OCP\IConfig;
 
 class CidgravityGatewayBackendService extends Backend {
-	public function __construct(IL10N $l, Password $legacyAuth, private IConfig $config) {
+	public function __construct(IL10N $l, Password $legacyAuth) {
 		$this
 			->setIdentifier('cidgravityGateway')
 			->addIdentifierAlias('\OC\Files\Storage\DAV')
@@ -46,11 +45,11 @@ class CidgravityGatewayBackendService extends Backend {
 				new DefinitionParameter('metadata_endpoint', $l->t('CIDgravity metadata URL')),
 				(new DefinitionParameter('default_ipfs_gateway', $l->t('Default IPFS gateway URL')))
 				->setType(DefinitionParameter::VALUE_TEXT)
-				->setDefaultValue($config->getSystemValue('cidgravity')['default_ipfs_gateway'])
+				->setDefaultValue("https://ipfs.io/ipfs")
 				->setTooltip('You can also use your custom gateway or public gateway such as https://dweb.link'),
 				(new DefinitionParameter('auto_create_user_folder', $l->t('Auto create user folder')))
 				->setType(DefinitionParameter::VALUE_BOOLEAN)
-				->setDefaultValue($config->getSystemValue('cidgravity')['auto_create_user_folder'])
+				->setDefaultValue(true)
 				->setTooltip('Auto create on folder on this external storage when a new user is created'),
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_PASSWORD)

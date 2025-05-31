@@ -35,22 +35,8 @@ make build-js-production
 
 ### Required configuration
 
-If you are using the advanced CIDgravity configuration, the required configuration is
+To enable advanced configuration for CIDgravity gateway, you can update the Nextcloud configuration file
 
 ```
-    'cidgravity' => array(
-        'gateway_enabled' => true,
-        'default_ipfs_gateway' => 'https://ipfs.io/ipfs',
-        'auto_create_user_folder' => true,
-    ),
-```
-
-If you are using basic CIDgravity configuration, the required configuration is
-
-```
-    'cidgravity' => array(
-        'gateway_enabled' => false,
-        'default_host' => '[URL_WITH_HTTPS_IF_ENABLED]',
-        'default_ssl_enabled' => true,
-    ),
+    'cidgravity_gateway_exterrnal_storage_enabled' => true,
 ```
