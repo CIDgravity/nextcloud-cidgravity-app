@@ -76,4 +76,39 @@ class ExternalStorageController extends Controller {
             return new DataResponse(['success' => false, 'error' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
 	}
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * Return the fileId from specific file path in user root folder (with external storage connected)
+	 * @return DataResponse
+     */
+	public function getFileIdFromFilePath(string $path): DataResponse {
+        $user = $this->userSession->getUser();
+        if (!$user) {
+            return new DataResponse(['success' => false, 'error' => 'user not authenticated'], Http::STATUS_UNAUTHORIZED);
+        }
+
+        if (empty($path) || !is_string($path) || trim($path) === '' || $path === '/') {
+            return new DataResponse(['success' => false, 'error' => 'invalid or missing file path'], Http::STATUS_FORBIDDEN);
+        }
+
+        $fileMetadata = $this->externalStorageService->getFileIdFromFilePath($user, $path);
+
+        // handle success or different type of errors to return the right status code
+        if (!isset($fileMetadata['error'])) {
+            return new DataResponse(['success' => true, 'data' => $fileMetadata], Http::STATUS_OK);
+
+        } else {            
+            if (isset($fileMetadata['access_denied'])) {
+                return new DataResponse(['success' => false, 'error' => $fileMetadata['error']], Http::STATUS_FORBIDDEN);
+
+            } else if (isset($fileMetadata['file_not_found'])) {
+                return new DataResponse(['success' => false, 'error' => $fileMetadata['error']], Http::STATUS_NOT_FOUND);
+
+            } else {
+                return new DataResponse(['success' => false, 'error' => $fileMetadata['error']], Http::STATUS_INTERNAL_SERVER_ERROR);
+            }
+        }
+	}
 }

@@ -149,6 +149,66 @@ class ExternalStorageService {
 	}
 
     /**
+	 * Get the fileId from entire file by searching in user folder (including connected external storages)
+	 * @param IUser $nextcloudUser Nextcloud user associated with the session
+	 * @param string $filePath file path to search for
+	 * @return array
+	 * @throws NotFoundException,Throwable
+	 */
+    public function getFileIdFromFilePath(IUser $nextcloudUser, string $filePath): array {
+        try{
+            $this->logger->info("CIDgravity - getFileIdFromFilePath: will execute request to get fileId from path", [
+                "nextcloudUserID" => $nextcloudUser->getUID(),
+                "filePath" => $filePath
+            ]);
+
+            $userFolder = $this->rootFolder->getUserFolder($nextcloudUser->getUID());
+
+            // Check if file exists. Because nextcloud internal API doesn't return the right exception message.
+            // To avoid strange response, we need to handle this properly.
+            if (!$userFolder->nodeExists($filePath)) {
+                $this->logger->error("CIDgravity - getFileIdFromFilePath: file not found");
+                return [
+                    'file_not_found' => true, 
+                    'error' => 'file not found or not allowed to read file'
+                ];
+            }
+
+            $file = $userFolder->get($filePath);
+
+            $this->logger->debug("CIDgravity - getFileIdFromFilePath: file found", [
+                "fileId" => $file->getId(),
+                "filePath" => $file->getPath(),
+                "fileName" => $file->getName(),
+                "fileSize" => $file->getSize(),
+                "fileOwner" => $file->getOwner()->getUID(),
+                "isReadable" => $file->isReadable()
+            ]);
+
+            if (!$file->isReadable()) {
+                $this->logger->warning("CIDgravity - getFileIdFromFilePath: user not allowed to read file");
+                return [
+                    'access_denied' => true,
+                    'error' => 'file not found or not allowed to read file'
+                ];
+            }
+
+            return ['fileId' => $file->getId()];
+
+        } catch (NotFoundException $e) {
+            $this->logger->error("CIDgravity - getFileIdFromFilePath: file not found");
+            return [
+                'file_not_found' => true, 
+                'error' => 'file not found or not allowed to read file'
+            ];
+
+        } catch (\Throwable $e) {
+            $this->logger->error("CIDgravity - getFileIdFromFilePath: unexpected error", [ "error" => $e->getMessage() ]);
+            return ['error' => 'unexpected error'];
+        }
+    }
+
+    /**
 	 * Construct specific configuration object from external storage configuration to avoid expose sensitive data (such as password ...)
      * @param string $fileInternalPath File internal path (without the external storage mount point, only path after)
      * @param bool $includeAuthSettings should include username and password in the returned configuration or not
