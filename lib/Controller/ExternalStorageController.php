@@ -60,8 +60,7 @@ class ExternalStorageController extends Controller {
 	 */
 	public function getMetadataForSpecificFile(int $fileId): DataResponse {
         try {
-
-            if (!is_int($fileId)) {
+            if (empty($fileId) || !is_int($fileId)) {
                 return new DataResponse(['success' => false, 'error' => 'invalid param fileId provided'], Http::STATUS_BAD_REQUEST);
             }
 
@@ -90,7 +89,7 @@ class ExternalStorageController extends Controller {
         }
 
         if (empty($path) || !is_string($path) || trim($path) === '' || $path === '/') {
-            return new DataResponse(['success' => false, 'error' => 'invalid or missing file path'], Http::STATUS_FORBIDDEN);
+            return new DataResponse(['success' => false, 'error' => 'invalid or missing file path'], Http::STATUS_BAD_REQUEST);
         }
 
         $fileMetadata = $this->externalStorageService->getFileIdFromFilePath($user, $path);
