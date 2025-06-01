@@ -80,24 +80,61 @@ class ExternalStorageService {
                         $externalStorageConfiguration['password'],
                     );
 
+                    // In case of success, we will happend some fileIds (local and remote)
+                    // This can help some debugs in some cases
+                    if ($response['success']) {
+                        $response['result']['localFileId'] = $fileId;
+                        return ['success' => true, 'metadata' => $response['result']];
+                    } else {
+                        return ['success' => false, 'error' => $response['error']];
+                    }
+
                 } else if($externalStorageConfiguration['is_cidgravity']) {
+                    
+                    // Note: in that case, we can't use fileId to send the request.
+                    // Because Nextcloud handle file indexing in own database, the fileId in current instance is not the same in another instance.
+                    // This means, if we use fileId, the file will not be found in the external nextcloud instance.
+                    // To handle this, we need to call the other nextcloud on custom api route to get right fileId from filePath.
+                    // And use it in the request to get all the required details.
+                    $this->logger->debug("CIDgravity storage found - Will execute external call to get remote fileId from path", [
+                        "localFileId" => $fileId,
+                        "filePathToUse" => $externalStorageConfiguration['filepath'],
+                    ]);
+
+                    $remoteFileId = $this->getFileIdFromPathOnExternalStorageEndpoint($externalStorageConfiguration);
+                    $this->logger->error("CIDgravity - Remote fileID response", [
+                        "remoteFileId" => $remoteFileId,
+                    ]);
+
+                    if ($remoteFileId == -1) {
+                        $this->logger->error("CIDgravity storage found - Remote fileId not found based on filePath");
+                        return ['success' => false, 'error' => 'unable to find remote fileId'];
+                    }
+
+                    $this->logger->debug("CIDgravity storage found - Remote fileId found - will execute call to get metadatas", [
+                        "localFileId" => $fileId,
+                        "remoteFileId" => $remoteFileId,
+                    ]);
+
                     $response = $this->httpClient->get(
-                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-file-metadata?fileId=" . $fileId, 
+                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-file-metadata?fileId=" . $remoteFileId, 
                         $externalStorageConfiguration['ssl_enabled'],
                         $externalStorageConfiguration['user'],
                         $externalStorageConfiguration['password'],
                     );
 
+                    // In case of success, we will happend some fileIds (local and remote)
+                    // This can help some debugs in some cases
+                    if ($response['success']) {
+                        $response['metadata']['localFileId'] = $fileId;
+                        $response['metadata']['remoteFileId'] = $remoteFileId;
+                        return ['success' => true, 'metadata' => $response['metadata']];
+                    } else {
+                        return ['success' => false, 'error' => $response['error']];
+                    }
+
                 } else {
                     return ['success' => false, 'error' => 'unable to find external storage type to send metadata request'];
-                }
-
-               // Handle the response. Format will be exactly the same, because when hitting nextcloud API
-               // hit a metadata endpoint. So same response, same format for both routes
-                if ($response['success']) {
-                    return ['success' => true, 'metadata' => $response['result']];
-                } else {
-                    return ['success' => false, 'error' => $response['error']];
                 }
 
             } else {
@@ -225,18 +262,18 @@ class ExternalStorageService {
         $configuration['ssl_enabled'] = $externalStorage->getBackendOption('secure');
         $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
 
+        // resolve the remote subfolder config (if it contains $user, will be automatically replaced by userID)
+        // this will help when sending metadata request to API endpoint
+        $resolvedMountpoint = $this->userConfigHandler->handle($externalStorage->getBackendOption('root'));
+
+        // if the mountpoint is not empty, prepend a slash
+        $mountpoint = trim($resolvedMountpoint, '/');
+        $filename = ltrim($fileInternalPath, '/');
+        $configuration['filepath'] = $mountpoint !== '' ? ($filename !== '' ? "/$mountpoint/$filename" : "/$mountpoint") : "/$filename";
+
         // available only for cidgravityGateway external storage
         if ($externalStorage->getBackend()->getIdentifier() == "cidgravityGateway") {
             $configuration['metadata_endpoint'] = $externalStorage->getBackendOption('metadata_endpoint');
-
-            // resolve the remote subfolder config (if it contains $user, will be automatically replaced by userID)
-            // this will help when sending metadata request to API endpoint
-            $resolvedMountpoint = $this->userConfigHandler->handle($externalStorage->getBackendOption('root'));
-
-            // if the mountpoint is not empty, prepend a slash
-            $mountpoint = trim($resolvedMountpoint, '/');
-            $filename = ltrim($fileInternalPath, '/');
-            $configuration['filepath'] = $mountpoint !== '' ? ($filename !== '' ? "/$mountpoint/$filename" : "/$mountpoint") : "/$filename";
         }
 
         // check if we need to include auth settings (for metadata call only, not exposed to frontend)
@@ -262,5 +299,28 @@ class ExternalStorageService {
         $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
 
         return $configuration;
+    }
+
+    /**
+	 * Get the fileId from path using an API call to specific URL and return the fileId
+	 * @param StorageConfig $externalStorage External storage to build configuration for
+	 * @return int
+	*/
+    private function getFileIdFromPathOnExternalStorageEndpoint(array $externalStorageConfiguration): int {
+        $filePath = $externalStorageConfiguration['filepath'];
+
+        $response = $this->httpClient->get(
+            $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-fileid-from-path?path=" . $filePath, 
+            $externalStorageConfiguration['ssl_enabled'],
+            $externalStorageConfiguration['user'],
+            $externalStorageConfiguration['password'],
+        );
+
+        if ($response['success']) {
+            return $response['data']['fileId'];
+        } else {
+            $this->logger->error("CIDgravity - getFileIdFromPathOnExternalStorageEndpoint: unable to get fileId", [ "error" => $response['error'] ]);
+            return -1;
+        }
     }
 }
