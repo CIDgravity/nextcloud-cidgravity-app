@@ -52,20 +52,59 @@ class ExternalStorageService {
     /**
 	 * Get the metadata from the external storage metadata endpoint for specific file
 	 * @param IUser $nextcloudUser Nextcloud user associated with the session
-	 * @param int $fileId File ID to search for
+	 * @param string $filePath File path to search for
 	 * @return array
 	 * @throws Exception
 	 */
-    public function getMetadataForSpecificFile(IUser $nextcloudUser, int $fileId): array {
-        try {
-            $externalStorageConfiguration = $this->getExternalStorageConfigurationForSpecificFile($nextcloudUser, $fileId, true);
+    public function getMetadataForSpecificFile(IUser $nextcloudUser, string $filePath): array {
+        try{
+            $this->logger->debug("CIDgravity - getMetadataForSpecificFileWithPath: will execute request to get file from path", [
+                "nextcloudUserID" => $nextcloudUser->getUID(),
+                "filePath" => $filePath
+            ]);
+
+            $userFolder = $this->rootFolder->getUserFolder($nextcloudUser->getUID());
+
+            // Check if file exists. Because nextcloud internal API doesn't return the right exception message.
+            // To avoid strange response, we need to handle this properly.
+            if (!$userFolder->nodeExists($filePath)) {
+                $this->logger->error("CIDgravity - getMetadataForSpecificFileWithPath: file not found");
+                return [
+                    'file_not_found' => true, 
+                    'error' => 'file not found or not allowed to read file'
+                ];
+            }
+
+            $file = $userFolder->get($filePath);
+
+            $this->logger->debug("CIDgravity - getMetadataForSpecificFileWithPath: file found", [
+                "fileId" => $file->getId(),
+                "filePath" => $file->getPath(),
+                "fileName" => $file->getName(),
+                "fileSize" => $file->getSize(),
+                "fileOwner" => $file->getOwner()->getUID(),
+                "isReadable" => $file->isReadable()
+            ]);
+
+            if (!$file->isReadable()) {
+                $this->logger->warning("CIDgravity - getMetadataForSpecificFileWithPath: user not allowed to read file");
+                return [
+                    'access_denied' => true,
+                    'error' => 'file not found or not allowed to read file'
+                ];
+            }
+
+            // Get metadata and external storage info here
+            $externalStorageConfiguration = $this->getExternalStorageConfigurationForSpecificFile(
+                $nextcloudUser,  
+                $file->getId(), 
+                true
+            );
 
             // Depending the external storage style, the request endpoint and method can change
             // cidgravity (using another nextcloud): GET on another nextcloud API link
             // cidgravityGateway (using webdav): POST on metadata_endpoint URL
             if (!isset($externalStorageConfiguration['error'])) {
-                $response = null;
-
                 if ($externalStorageConfiguration['is_cidgravity_gateway']) {
                     $requestBody = [
                         "verbose" => true,
@@ -80,10 +119,7 @@ class ExternalStorageService {
                         $externalStorageConfiguration['password'],
                     );
 
-                    // In case of success, we will happend some fileIds (local and remote)
-                    // This can help some debugs in some cases
                     if ($response['success']) {
-                        $response['result']['localFileId'] = $fileId;
                         return ['success' => true, 'metadata' => $response['result']];
                     } else {
                         return ['success' => false, 'error' => $response['error']];
@@ -91,43 +127,17 @@ class ExternalStorageService {
 
                 } else if($externalStorageConfiguration['is_cidgravity']) {
                     
-                    // Note: in that case, we can't use fileId to send the request.
+                    // Note: we choose to use path to avoid getting remote FileId.
                     // Because Nextcloud handle file indexing in own database, the fileId in current instance is not the same in another instance.
                     // This means, if we use fileId, the file will not be found in the external nextcloud instance.
-                    // To handle this, we need to call the other nextcloud on custom api route to get right fileId from filePath.
-                    // And use it in the request to get all the required details.
-                    $this->logger->debug("CIDgravity storage found - Will execute external call to get remote fileId from path", [
-                        "localFileId" => $fileId,
-                        "filePathToUse" => $externalStorageConfiguration['filepath'],
-                    ]);
-
-                    $remoteFileId = $this->getFileIdFromPathOnExternalStorageEndpoint($externalStorageConfiguration);
-                    $this->logger->error("CIDgravity - Remote fileID response", [
-                        "remoteFileId" => $remoteFileId,
-                    ]);
-
-                    if ($remoteFileId == -1) {
-                        $this->logger->error("CIDgravity storage found - Remote fileId not found based on filePath");
-                        return ['success' => false, 'error' => 'unable to find remote fileId'];
-                    }
-
-                    $this->logger->debug("CIDgravity storage found - Remote fileId found - will execute call to get metadatas", [
-                        "localFileId" => $fileId,
-                        "remoteFileId" => $remoteFileId,
-                    ]);
-
                     $response = $this->httpClient->get(
-                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity/get-file-metadata?fileId=" . $remoteFileId, 
+                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity/get-file-metadata?filePath=" . $externalStorageConfiguration['filepath'], 
                         $externalStorageConfiguration['ssl_enabled'],
                         $externalStorageConfiguration['user'],
                         $externalStorageConfiguration['password'],
                     );
 
-                    // In case of success, we will happend some fileIds (local and remote)
-                    // This can help some debugs in some cases
                     if ($response['success']) {
-                        $response['metadata']['localFileId'] = $fileId;
-                        $response['metadata']['remoteFileId'] = $remoteFileId;
                         return ['success' => true, 'metadata' => $response['metadata']];
                     } else {
                         return ['success' => false, 'error' => $response['error']];
@@ -142,7 +152,7 @@ class ExternalStorageService {
             }
 
         } catch (Exception $e) {
-            return ['success' => false, 'error' => 'error getting metadata for file ' . $fileId];
+            return ['success' => false, 'error' => 'error getting metadata'];
         }
 	}
 
@@ -184,66 +194,6 @@ class ExternalStorageService {
             return ['message' => 'external storage not available for file ' . $fileId, 'error' => $e->getMessage()];
         }
 	}
-
-    /**
-	 * Get the fileId from entire file by searching in user folder (including connected external storages)
-	 * @param IUser $nextcloudUser Nextcloud user associated with the session
-	 * @param string $filePath file path to search for
-	 * @return array
-	 * @throws NotFoundException,Throwable
-	 */
-    public function getFileIdFromFilePath(IUser $nextcloudUser, string $filePath): array {
-        try{
-            $this->logger->info("CIDgravity - getFileIdFromFilePath: will execute request to get fileId from path", [
-                "nextcloudUserID" => $nextcloudUser->getUID(),
-                "filePath" => $filePath
-            ]);
-
-            $userFolder = $this->rootFolder->getUserFolder($nextcloudUser->getUID());
-
-            // Check if file exists. Because nextcloud internal API doesn't return the right exception message.
-            // To avoid strange response, we need to handle this properly.
-            if (!$userFolder->nodeExists($filePath)) {
-                $this->logger->error("CIDgravity - getFileIdFromFilePath: file not found");
-                return [
-                    'file_not_found' => true, 
-                    'error' => 'file not found or not allowed to read file'
-                ];
-            }
-
-            $file = $userFolder->get($filePath);
-
-            $this->logger->debug("CIDgravity - getFileIdFromFilePath: file found", [
-                "fileId" => $file->getId(),
-                "filePath" => $file->getPath(),
-                "fileName" => $file->getName(),
-                "fileSize" => $file->getSize(),
-                "fileOwner" => $file->getOwner()->getUID(),
-                "isReadable" => $file->isReadable()
-            ]);
-
-            if (!$file->isReadable()) {
-                $this->logger->warning("CIDgravity - getFileIdFromFilePath: user not allowed to read file");
-                return [
-                    'access_denied' => true,
-                    'error' => 'file not found or not allowed to read file'
-                ];
-            }
-
-            return ['fileId' => $file->getId()];
-
-        } catch (NotFoundException $e) {
-            $this->logger->error("CIDgravity - getFileIdFromFilePath: file not found");
-            return [
-                'file_not_found' => true, 
-                'error' => 'file not found or not allowed to read file'
-            ];
-
-        } catch (\Throwable $e) {
-            $this->logger->error("CIDgravity - getFileIdFromFilePath: unexpected error", [ "error" => $e->getMessage() ]);
-            return ['error' => 'unexpected error'];
-        }
-    }
 
     /**
 	 * Construct specific configuration object from external storage configuration to avoid expose sensitive data (such as password ...)
@@ -299,28 +249,5 @@ class ExternalStorageService {
         $configuration['default_ipfs_gateway'] = $externalStorage->getBackendOption('default_ipfs_gateway');
 
         return $configuration;
-    }
-
-    /**
-	 * Get the fileId from path using an API call to specific URL and return the fileId
-	 * @param StorageConfig $externalStorage External storage to build configuration for
-	 * @return int
-	*/
-    private function getFileIdFromPathOnExternalStorageEndpoint(array $externalStorageConfiguration): int {
-        $filePath = $externalStorageConfiguration['filepath'];
-
-        $response = $this->httpClient->get(
-            $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity/get-fileid-from-path?path=" . $filePath, 
-            $externalStorageConfiguration['ssl_enabled'],
-            $externalStorageConfiguration['user'],
-            $externalStorageConfiguration['password'],
-        );
-
-        if ($response['success']) {
-            return $response['data']['fileId'];
-        } else {
-            $this->logger->error("CIDgravity - getFileIdFromPathOnExternalStorageEndpoint: unable to get fileId", [ "error" => $response['error'] ]);
-            return -1;
-        }
     }
 }

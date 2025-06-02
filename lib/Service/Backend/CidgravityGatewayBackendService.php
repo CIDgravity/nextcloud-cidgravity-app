@@ -35,7 +35,7 @@ class CidgravityGatewayBackendService extends Backend {
 			->setIdentifier('cidgravityGateway')
 			->addIdentifierAlias('\OC\Files\Storage\DAV')
 			->setStorageClass('\OC\Files\Storage\DAV')
-			->setText($l->t('CIDgravity gateway'))
+			->setText('PublicFilecoin')
 			->addParameters([
 				new DefinitionParameter('host', $l->t('CIDgravity gateway URL')),
 				(new DefinitionParameter('root', $l->t('Remote subfolder')))

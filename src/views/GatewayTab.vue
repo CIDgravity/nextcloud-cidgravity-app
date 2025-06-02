@@ -392,7 +392,7 @@ export default {
 			this.ipfsGateway = this.externalStorageConfiguration.default_ipfs_gateway
 		},
 		loadFileMetadata() {
-			axios.get(generateOcsUrl('apps/cidgravity/get-file-metadata?fileId=' + this.fileInfo.id, 2)).then(res => {
+			axios.get(generateOcsUrl('apps/cidgravity/get-file-metadata?filePath=' + this.fileInfo.path + '/' + this.fileInfo.name, 2)).then(res => {
 				if (res.data.success) {
 					this.fileMetadata = res.data.metadata.file
 					this.isCidgravityStorageLocal = true
