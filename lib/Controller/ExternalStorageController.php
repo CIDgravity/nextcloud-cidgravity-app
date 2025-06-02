@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\Cidgravity\Controller;
+namespace OCA\CIDgravity\Controller;
 
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 use Exception;
-use OCA\Cidgravity\Service\ExternalStorageService;
+use OCA\CIDgravity\Service\ExternalStorageService;
 use Psr\Log\LoggerInterface;
 use OCP\IRequest;
 use OCP\AppFramework\Http;

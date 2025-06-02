@@ -1,6 +1,6 @@
 <?php
 
-namespace OCA\Cidgravity\AppInfo;
+namespace OCA\CIDgravity\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -8,9 +8,9 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 
-use OCA\Cidgravity\Event\Listener\LoadAdditionalScriptsListener;
-use OCA\Cidgravity\Event\Listener\ExternalStoragesRegistrationListener;
-use OCA\Cidgravity\Event\Listener\UserCreatedListener;
+use OCA\CIDgravity\Event\Listener\LoadAdditionalScriptsListener;
+use OCA\CIDgravity\Event\Listener\ExternalStoragesRegistrationListener;
+use OCA\CIDgravity\Event\Listener\UserCreatedListener;
 
 use OCP\User\Events\UserCreatedEvent;
 

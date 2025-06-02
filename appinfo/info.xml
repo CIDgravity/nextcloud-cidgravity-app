@@ -1,21 +1,50 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>cidgravity</id>
-	<name>Cidgravity</name>
-	<summary>An application to display files/directory metadata on decentralized web for CIDgravity storage files</summary>
-	<description>An application to display files/directory metadata on decentralized web for CIDgravity storage files</description>
+    <name>CIDgravity - IPFS/Filecoin external storage</name>
+	<summary>CIDgravity adds IPFS and Filecoin as an External Storage backend in Nextcloud, enabling decentralized file storage.</summary>
+    <description><![CDATA[
+        # CIDgravity for Nextcloud
+**Decentralized Storage Integration via IPFS & Filecoin**
+
+CIDgravity integrates IPFS and Filecoin as a decentralized backend for your Nextcloud instance. It enables seamless storage and retrieval of files using content addressing (via IPFS CIDs), while leveraging Filecoin for persistent and verifiable storage.
+
+With CIDgravity, users can continue working within the familiar Nextcloud interface, while benefiting from the resilience, **verifiability**, and **immutability** provided by Web3 storage protocols like IPFS.
+
+## Get Started
+
+- 🧾 **Access:** Create an account <a href="https://nextcloud.twinquasar.io" target="_blank">HERE</a>
+- 🎁 **Storage:** First 25 GB are free; then $5 per TB per month
+- 🔐 **Important:** Data stored on IPFS/Filecoin is **public**. Please encrypt sensitive content or only upload non-private files.
+
+## Key Features
+- Add IPFS + Filecoin as an External Storage backend in Nextcloud
+- Store files in IPFS and back them with Filecoin storage deals
+- Retrieve files via their IPFS CIDs from **any public IPFS gateway**
+- Share data easily with simple IPFS links
+- View IPFS/Filecoin info directly in the **Nextcloud file details panel**
+- Maintain Nextcloud file versioning and metadata sync
+- Transparent integration with minimal disruption to end-user experience
+- Decentralized by design: Your data is safely replicated across the IPFS/Filecoin network — even if CIDgravity disappears, content remains accessible via its CID.
+
+📘 **Learn More:** [What is IPFS?](https://docs.ipfs.tech/concepts/what-is-ipfs/)
+
+        ]]>
+</description>
+<screenshot>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app/blob/main/screenshots/app1.png?raw=true</screenshot>
 	<version>2.0.0</version>
 	<licence>agpl</licence>
 	<author homepage="https://cidgravity.com">CIDgravity</author>
-	<namespace>Cidgravity</namespace>
+	<namespace>CIDgravity</namespace>
 	<category>tools</category>
+	<category>files</category>
 	<documentation>
-        <admin>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app</admin>
+        <admin>https://docs.cidgravity.com/nextcloud-users/filecoin/requirements/</admin>
     </documentation>
-	<bugs>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app</bugs>
-    <website>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app</website>
+	<bugs>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app/issues</bugs>
+    <website>https://cidgravity.com</website>
 	<repository type="git">https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app</repository>
 	<dependencies>
 		<nextcloud min-version="29" max-version="31" />
-	</dependencies>
+    </dependencies>
 </info>

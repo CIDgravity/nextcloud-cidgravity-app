@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\Cidgravity\Event\Listener;
+namespace OCA\CIDgravity\Event\Listener;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 
-use OCA\Cidgravity\AppInfo\Application;
+use OCA\CIDgravity\AppInfo\Application;
 
 class LoadAdditionalScriptsListener implements IEventListener {
 	public function __construct() {}

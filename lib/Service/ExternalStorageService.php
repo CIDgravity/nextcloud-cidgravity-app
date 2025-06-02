@@ -21,7 +21,7 @@
  *
 */
 
-namespace OCA\Cidgravity\Service;
+namespace OCA\CIDgravity\Service;
 
 use Exception;
 use OCP\IUser;
