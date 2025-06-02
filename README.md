@@ -34,7 +34,7 @@ You can install the app directly from the Nextcloud App Store:
 The app will now be available in your Nextcloud instance and ready for configuration.
 
 ### Manual installation (from releases)
-* Download the latest version from the [release page](https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app/releases/latest).
+* Download the latest version from the [release page](https://github.com/CIDgravity/nextcloud-cidgravity-app/releases/latest).
 * Extract the archive to your Nextcloud's app folder, e.g. `unzip cidgravity-vx.x.x.zip -C /path/to/nextcloud/apps`
 * Enable the app in the Apps section of your Nextcloud.
 
@@ -43,7 +43,7 @@ The app will now be available in your Nextcloud instance and ready for configura
 
 ```
 cd /path/to/nextcloud/apps/
-git clone https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app.git
+git clone https://github.com/CIDgravity/nextcloud-cidgravity-app.git
 mv nextcloud-cidgravity-gateway-app/ cidgravity/
 cd cidgravity/
 make composer

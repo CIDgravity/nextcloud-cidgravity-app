@@ -4,13 +4,13 @@
 	"version": "2.0.0",
 	"author": "CIDgravity <support@cidgravity.com>",
 	"bugs": {
-		"url": "https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app"
+		"url": "https://github.com/CIDgravity/nextcloud-cidgravity-app"
 	},
 	"repository": {
-		"url": "https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app",
+		"url": "https://github.com/CIDgravity/nextcloud-cidgravity-app",
 		"type": "git"
 	},
-	"homepage": "https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app",
+	"homepage": "https://github.com/CIDgravity/nextcloud-cidgravity-app",
 	"license": "agpl",
 	"private": true,
 	"scripts": {

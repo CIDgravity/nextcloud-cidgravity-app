@@ -31,7 +31,7 @@ With CIDgravity, users can continue working within the familiar Nextcloud interf
 
         ]]>
 </description>
-<screenshot>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app/blob/main/screenshots/app1.png?raw=true</screenshot>
+<screenshot>https://github.com/CIDgravity/nextcloud-cidgravity-app/blob/main/screenshots/app1.png?raw=true</screenshot>
 	<version>2.0.0</version>
 	<licence>agpl</licence>
 	<author homepage="https://cidgravity.com">CIDgravity</author>
@@ -41,9 +41,9 @@ With CIDgravity, users can continue working within the familiar Nextcloud interf
 	<documentation>
         <admin>https://docs.cidgravity.com/nextcloud-users/filecoin/requirements/</admin>
     </documentation>
-	<bugs>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app/issues</bugs>
+	<bugs>https://github.com/CIDgravity/nextcloud-cidgravity-app/issues</bugs>
     <website>https://cidgravity.com</website>
-	<repository type="git">https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app</repository>
+	<repository type="git">https://github.com/CIDgravity/nextcloud-cidgravity-app</repository>
 	<dependencies>
 		<nextcloud min-version="29" max-version="31" />
     </dependencies>
