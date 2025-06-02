@@ -38,17 +38,18 @@ class CidgravityBackendService extends Backend {
 			->setText($l->t('CIDgravity'))
 			->addParameters([
 				(new DefinitionParameter('host', $l->t('URL')))
-					->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					//->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setType(DefinitionParameter::VALUE_TEXT)
-					->setDefaultValue("https://nextcloud-2.twinquasar.io"),
+					->setDefaultValue("https://nextcloud.twinquasar.io"),
 				(new DefinitionParameter('secure', $l->t('Secure https://')))
 					->setType(DefinitionParameter::VALUE_BOOLEAN)
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setDefaultValue(true),
 				(new DefinitionParameter('root', $l->t('Remote subfolder')))
-					->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					//->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setType(DefinitionParameter::VALUE_TEXT)
-					->setDefaultValue("Public_Filecoin"),
+					->setDefaultValue("PublicFilecoin")
+					->setTooltip('Root folder without any slashes before or after'),
 				(new DefinitionParameter('default_ipfs_gateway', $l->t('Default IPFS gateway URL')))
 					->setType(DefinitionParameter::VALUE_TEXT)
 					->setDefaultValue("https://ipfs.io/ipfs")
