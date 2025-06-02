@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\Cidgravity_Gateway\Controller;
+namespace OCA\Cidgravity\Controller;
 
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 use Exception;
-use OCA\Cidgravity_Gateway\Service\ExternalStorageService;
+use OCA\Cidgravity\Service\ExternalStorageService;
 use Psr\Log\LoggerInterface;
 use OCP\IRequest;
 use OCP\AppFramework\Http;
@@ -26,7 +26,7 @@ class ExternalStorageController extends Controller {
 	 * @NoCSRFRequired
 	 * Return the external storage configuration that belongs to a specific file ID
 	 * @return DataResponse
-	 */
+	*/
 	public function getExternalStorageConfigurationForSpecificFile(int $fileId): DataResponse {
         try {
 

@@ -1,5 +1,5 @@
 OC.L10N.register(
-    "cidgravity_gateway",
+    "cidgravity",
     {
         "CIDgravity": "CIDgravity",
         "Select an IPFS gateway": "Select an IPFS gateway",

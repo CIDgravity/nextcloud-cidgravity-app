@@ -1,5 +1,5 @@
 {
-    "name": "nextcloud/cidgravity_gateway",
+    "name": "nextcloud/cidgravity",
     "description": "An application to display files/directory metadata on decentralized web for CIDgravity storage files",
     "type": "project",
     "license": "AGPL",
@@ -11,7 +11,7 @@
     ],
     "autoload": {
 		"psr-4": {
-			"OCA\\Cidgravity_Gateway\\": "lib/"
+			"OCA\\Cidgravity\\": "lib/"
 		}
 	},
     "require": {

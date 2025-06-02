@@ -16,7 +16,7 @@ Access a new tab for file details to view additional information about the file 
 
 ### Manual installation (from releases)
 * Download the latest version from the [release page](https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app/releases/latest).
-* Extract the archive to your Nextcloud's app folder, e.g. `unzip cidgravity_gateway-vx.x.x.zip -C /path/to/nextcloud/apps`
+* Extract the archive to your Nextcloud's app folder, e.g. `unzip cidgravity-vx.x.x.zip -C /path/to/nextcloud/apps`
 * Enable the app in the Apps section of your Nextcloud.
 
 ### Manual installation (from repository)
@@ -38,5 +38,5 @@ make build-js-production
 To enable advanced configuration for CIDgravity gateway, you can update the Nextcloud configuration file
 
 ```
-    'cidgravity_gateway_exterrnal_storage_enabled' => true,
+    'cidgravity_gateway_external_storage_enabled' => true,
 ```

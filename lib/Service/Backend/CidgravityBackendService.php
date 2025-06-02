@@ -21,7 +21,7 @@
  *
 */
 
-namespace OCA\Cidgravity_Gateway\Service\Backend;
+namespace OCA\Cidgravity\Service\Backend;
 
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\Auth\AuthMechanism;
@@ -40,11 +40,15 @@ class CidgravityBackendService extends Backend {
 				(new DefinitionParameter('host', $l->t('URL')))
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setType(DefinitionParameter::VALUE_TEXT)
-					->setDefaultValue("https://nextcloud.twinquasar.io"),
+					->setDefaultValue("https://nextcloud-2.twinquasar.io"),
 				(new DefinitionParameter('secure', $l->t('Secure https://')))
 					->setType(DefinitionParameter::VALUE_BOOLEAN)
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setDefaultValue(true),
+				(new DefinitionParameter('root', $l->t('Remote subfolder')))
+					->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					->setType(DefinitionParameter::VALUE_TEXT)
+					->setDefaultValue("Public_Filecoin"),
 				(new DefinitionParameter('default_ipfs_gateway', $l->t('Default IPFS gateway URL')))
 					->setType(DefinitionParameter::VALUE_TEXT)
 					->setDefaultValue("https://ipfs.io/ipfs")

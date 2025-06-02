@@ -1,5 +1,5 @@
 {
-	"name": "cidgravity_gateway",
+	"name": "cidgravity",
 	"description": "An application to display files/directory metadata on decentralized web for CIDgravity storage files",
 	"version": "2.0.0",
 	"author": "CIDgravity <support@cidgravity.com>",

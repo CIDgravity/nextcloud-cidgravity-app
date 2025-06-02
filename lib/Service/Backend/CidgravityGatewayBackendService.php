@@ -21,7 +21,7 @@
  *
 */
 
-namespace OCA\Cidgravity_Gateway\Service\Backend;
+namespace OCA\Cidgravity\Service\Backend;
 
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\Auth\AuthMechanism;

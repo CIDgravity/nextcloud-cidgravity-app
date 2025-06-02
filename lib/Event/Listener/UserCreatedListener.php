@@ -21,7 +21,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Cidgravity_Gateway\Event\Listener;
+namespace OCA\Cidgravity\Event\Listener;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -31,7 +31,6 @@ use OCP\IConfig;
 use OCP\User\Events\UserCreatedEvent;
 use OCA\Files_External\Service\GlobalStoragesService;
 
-use OC\Files\Storage\DAV;
 use OC\Files\Storage\StorageFactory;
 use OC\Files\Mount\Manager;
 

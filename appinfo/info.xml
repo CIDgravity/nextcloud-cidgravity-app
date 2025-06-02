@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-	<id>cidgravity_gateway</id>
-	<name>Cidgravity_Gateway</name>
+	<id>cidgravity</id>
+	<name>Cidgravity</name>
 	<summary>An application to display files/directory metadata on decentralized web for CIDgravity storage files</summary>
 	<description>An application to display files/directory metadata on decentralized web for CIDgravity storage files</description>
 	<version>2.0.0</version>
 	<licence>agpl</licence>
 	<author homepage="https://cidgravity.com">CIDgravity</author>
-	<author>CIDgravity</author>
-	<namespace>Cidgravity_Gateway</namespace>
+	<namespace>Cidgravity</namespace>
 	<category>tools</category>
 	<documentation>
         <admin>https://github.com/CIDgravity/nextcloud-cidgravity-gateway-app</admin>

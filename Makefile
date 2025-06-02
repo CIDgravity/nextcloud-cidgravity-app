@@ -1,4 +1,4 @@
-app_name=cidgravity_gateway
+app_name=cidgravity
 project_dir=$(CURDIR)
 build_dir=$(CURDIR)/build/artifacts
 appstore_dir=$(build_dir)/appstore

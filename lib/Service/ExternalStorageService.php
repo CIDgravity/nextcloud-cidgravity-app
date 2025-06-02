@@ -21,7 +21,7 @@
  *
 */
 
-namespace OCA\Cidgravity_Gateway\Service;
+namespace OCA\Cidgravity\Service;
 
 use Exception;
 use OCP\IUser;
@@ -117,7 +117,7 @@ class ExternalStorageService {
                     ]);
 
                     $response = $this->httpClient->get(
-                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-file-metadata?fileId=" . $remoteFileId, 
+                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity/get-file-metadata?fileId=" . $remoteFileId, 
                         $externalStorageConfiguration['ssl_enabled'],
                         $externalStorageConfiguration['user'],
                         $externalStorageConfiguration['password'],
@@ -310,7 +310,7 @@ class ExternalStorageService {
         $filePath = $externalStorageConfiguration['filepath'];
 
         $response = $this->httpClient->get(
-            $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity_gateway/get-fileid-from-path?path=" . $filePath, 
+            $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity/get-fileid-from-path?path=" . $filePath, 
             $externalStorageConfiguration['ssl_enabled'],
             $externalStorageConfiguration['user'],
             $externalStorageConfiguration['password'],

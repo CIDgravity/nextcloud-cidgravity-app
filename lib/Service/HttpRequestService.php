@@ -21,7 +21,7 @@
  *
 */
 
-namespace OCA\Cidgravity_Gateway\Service;
+namespace OCA\Cidgravity\Service;
 
 use Exception;
 use Psr\Log\LoggerInterface;
