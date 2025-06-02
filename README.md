@@ -10,6 +10,18 @@ With CIDgravity, users can continue working within the familiar Nextcloud interf
 ## Requirements
 * Nextcloud 31
 
+## Key Features
+- Add IPFS + Filecoin as an External Storage backend in Nextcloud
+- Store files in IPFS and back them with Filecoin storage deals
+- Retrieve files via their IPFS CIDs from **any public IPFS gateway**
+- Share data easily with simple IPFS links
+- View IPFS/Filecoin info directly in the **Nextcloud file details panel**
+- Maintain Nextcloud file versioning and metadata sync
+- Transparent integration with minimal disruption to end-user experience
+- Decentralized by design: Your data is safely replicated across the IPFS/Filecoin network — even if CIDgravity disappears, content remains accessible via its CID.
+
+📘 **Learn More:** [What is IPFS?](https://docs.ipfs.tech/concepts/what-is-ipfs/)
+
 ## Get Started
 
 - 🧾 **Access:** Create an account <a href="https://nextcloud.twinquasar.io" target="_blank">HERE</a>

@@ -38,7 +38,7 @@ class CIDgravityBackendService extends Backend {
 			->setText($l->t('CIDgravity'))
 			->addParameters([
 				(new DefinitionParameter('host', $l->t('URL')))
-					->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					//->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setType(DefinitionParameter::VALUE_TEXT)
 					->setDefaultValue("https://nextcloud.twinquasar.io"),
 				(new DefinitionParameter('secure', $l->t('Secure https://')))
@@ -46,7 +46,7 @@ class CIDgravityBackendService extends Backend {
 					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setDefaultValue(true),
 				(new DefinitionParameter('root', $l->t('Remote subfolder')))
-					->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					//->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setType(DefinitionParameter::VALUE_TEXT)
 					->setDefaultValue("PublicFilecoin")
 					->setTooltip('Root folder without any slashes before or after'),
