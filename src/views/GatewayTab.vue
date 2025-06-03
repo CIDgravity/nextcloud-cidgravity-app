@@ -329,7 +329,7 @@ export default {
 		},
 	},
 
-	beforeDestroy() {
+	beforeUnmount() {
 		try {
 			this.tab.$destroy()
 		} catch (error) {
