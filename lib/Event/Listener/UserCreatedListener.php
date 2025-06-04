@@ -21,7 +21,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Cidgravity_Gateway\Event\Listener;
+namespace OCA\CIDgravity\Event\Listener;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -31,7 +31,6 @@ use OCP\IConfig;
 use OCP\User\Events\UserCreatedEvent;
 use OCA\Files_External\Service\GlobalStoragesService;
 
-use OC\Files\Storage\DAV;
 use OC\Files\Storage\StorageFactory;
 use OC\Files\Mount\Manager;
 
@@ -57,8 +56,8 @@ class UserCreatedListener implements IEventListener
         $externalStorages = $this->globalStoragesService->getStorages();
 
         foreach ($externalStorages as $externalStorage) {
-            if ($externalStorage->getBackend()->getIdentifier() != "cidgravity") {
-                $this->logger->debug("CIDgravity - UserCreatedEvent: external storage not of type cidgravity", [
+            if ($externalStorage->getBackend()->getIdentifier() != "cidgravityGateway") {
+                $this->logger->debug("CIDgravity - UserCreatedEvent: external storage not of type cidgravityGateway", [
                     "externalStorage" => json_encode($externalStorage),
                     "user" => json_encode($event->getUser())
                 ]);

@@ -1,4 +1,4 @@
-app_name=cidgravity_gateway
+app_name=cidgravity
 project_dir=$(CURDIR)
 build_dir=$(CURDIR)/build/artifacts
 appstore_dir=$(build_dir)/appstore
@@ -35,10 +35,10 @@ lint-fix:
 	npm run lint:fix
 
 npm-init:
-	npm ci
+	npm ci --legacy-peer-deps
 
 npm-update:
-	npm update
+	npm update --legacy-peer-deps
 
 clean:
 	rm -rf js/*

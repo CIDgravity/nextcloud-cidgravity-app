@@ -21,19 +21,24 @@
  *
 */
 
-namespace OCA\Cidgravity_Gateway\Service;
+namespace OCA\CIDgravity\Service;
 
 use OCA\Files_External\Lib\Auth\Password\Password;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCP\L10N\IFactory;
+use OCP\IConfig;
 
 class ProviderService implements IBackendProvider {
 	/** @var IFactory */
 	protected $lFactory;
 
-	public function __construct(IFactory $lFactory) {
+	/** @var IConfig */
+	protected $lconfig;
+
+	public function __construct(IFactory $lFactory, private IConfig $config) {
 		$this->lFactory = $lFactory;
+		$this->lconfig = $config;
 	}
 
 	/**
@@ -41,11 +46,23 @@ class ProviderService implements IBackendProvider {
 	 * @return Backend[]
 	 */
 	public function getBackends() {
-		$backend = new \OCA\Cidgravity_Gateway\Service\BackendService(
+		$cidgravityBackend = new \OCA\CIDgravity\Service\Backend\CIDgravityBackendService(
 			$this->lFactory->get('cidgravity'),
 			new Password($this->lFactory->get('files_external'))
 		);
 
-		return [ $backend ];
+		$backends = [ $cidgravityBackend ];
+
+		// Enable CIDgravityGateway external storage only if config is set
+		if ($this->lconfig->getSystemValue('cidgravity_gateway_external_storage_enabled')) {
+			$cidgravityGatewayBackend = new \OCA\CIDgravity\Service\Backend\CIDgravityGatewayBackendService(
+				$this->lFactory->get('cidgravityGateway'),
+				new Password($this->lFactory->get('files_external'))
+			);
+
+			array_push($backends, $cidgravityGatewayBackend);
+		}
+
+		return $backends;
 	}
 }

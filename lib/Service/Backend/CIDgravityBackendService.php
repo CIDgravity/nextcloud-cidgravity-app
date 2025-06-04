@@ -21,7 +21,7 @@
  *
 */
 
-namespace OCA\Cidgravity_Gateway\Service;
+namespace OCA\CIDgravity\Service\Backend;
 
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\Auth\AuthMechanism;
@@ -29,29 +29,31 @@ use OCA\Files_External\Lib\Auth\Password\Password;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCP\IL10N;
 
-class BackendService extends Backend {
+class CIDgravityBackendService extends Backend {
 	public function __construct(IL10N $l, Password $legacyAuth) {
 		$this
 			->setIdentifier('cidgravity')
-			->addIdentifierAlias('\OC\Files\Storage\DAV')
-			->setStorageClass('\OC\Files\Storage\DAV')
+			->addIdentifierAlias('\OC\Files\Storage\OwnCloud')
+			->setStorageClass('\OCA\Files_External\Lib\Storage\OwnCloud')
 			->setText($l->t('CIDgravity'))
 			->addParameters([
-				new DefinitionParameter('host', $l->t('CIDgravity gateway URL')),
-				(new DefinitionParameter('root', $l->t('Remote subfolder')))
-					->setFlag(DefinitionParameter::FLAG_OPTIONAL),
+				(new DefinitionParameter('host', $l->t('URL')))
+					//->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					->setType(DefinitionParameter::VALUE_TEXT)
+					->setDefaultValue("https://nextcloud.twinquasar.io"),
 				(new DefinitionParameter('secure', $l->t('Secure https://')))
 					->setType(DefinitionParameter::VALUE_BOOLEAN)
+					->setFlag(DefinitionParameter::FLAG_HIDDEN)
 					->setDefaultValue(true),
-				new DefinitionParameter('metadata_endpoint', $l->t('CIDgravity metadata URL')),
+				(new DefinitionParameter('root', $l->t('Remote subfolder')))
+					//->setFlag(DefinitionParameter::FLAG_HIDDEN)
+					->setType(DefinitionParameter::VALUE_TEXT)
+					->setDefaultValue("PublicFilecoin")
+					->setTooltip('Root folder without any slashes before or after'),
 				(new DefinitionParameter('default_ipfs_gateway', $l->t('Default IPFS gateway URL')))
-				->setType(DefinitionParameter::VALUE_TEXT)
-				->setDefaultValue('https://ipfs.io/ipfs')
-				->setTooltip('You can also use your custom gateway or public gateway such as https://dweb.link'),
-				(new DefinitionParameter('auto_create_user_folder', $l->t('Auto create user folder')))
-				->setType(DefinitionParameter::VALUE_BOOLEAN)
-				->setDefaultValue(false)
-				->setTooltip('Auto create on folder on this external storage when a new user is created'),
+					->setType(DefinitionParameter::VALUE_TEXT)
+					->setDefaultValue("https://ipfs.io/ipfs")
+					->setTooltip('You can also use your custom gateway or public gateway such as https://dweb.link'),
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_PASSWORD)
 			->setLegacyAuthMechanism($legacyAuth);

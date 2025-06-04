@@ -58,7 +58,6 @@ export default {
 		title: {
 			type: String,
 			default: '',
-			required: true,
 		},
 		subtitle: {
 			type: String,
@@ -99,7 +98,7 @@ export default {
 	min-height: 44px;
 	&__desc {
 		padding: 8px;
-		padding-left: 10px;
+		padding-inline-start: 10px;
 		line-height: 1.2em;
 		position: relative;
 		flex: 1 1;
@@ -115,7 +114,7 @@ export default {
 		max-width: inherit;
 	}
 	&__actions {
-		margin-left: auto !important;
+		margin-inline-start: auto !important;
 	}
 }
 </style>
