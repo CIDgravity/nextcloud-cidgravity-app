@@ -70,7 +70,7 @@
 		"eslint-plugin-jsdoc": "^50.7.1",
 		"eslint-plugin-n": "^17.19.0",
 		"eslint-plugin-promise": "^7.2.1",
-		"eslint-plugin-vue": "^10.1.0",
+		"eslint-plugin-vue": "^10.2.0",
 		"eslint-webpack-plugin": "^4.2.0",
 		"node-polyfill-webpack-plugin": "^3.0.0",
 		"postcss-html": "^1.8.0",
