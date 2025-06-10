@@ -130,8 +130,13 @@ class ExternalStorageService {
                     // Note: we choose to use path to avoid getting remote FileId.
                     // Because Nextcloud handle file indexing in own database, the fileId in current instance is not the same in another instance.
                     // This means, if we use fileId, the file will not be found in the external nextcloud instance.
-                    $response = $this->httpClient->get(
-                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity/get-file-metadata?filePath=" . $externalStorageConfiguration['filepath'], 
+                    $requestBody = [
+                        "filePath" => $externalStorageConfiguration['filepath'],
+                    ];
+
+                    $response = $this->httpClient->post(
+                        $externalStorageConfiguration['host'] . "/ocs/v2.php/apps/cidgravity/get-file-metadata", 
+                        $requestBody,
                         $externalStorageConfiguration['ssl_enabled'],
                         $externalStorageConfiguration['user'],
                         $externalStorageConfiguration['password'],

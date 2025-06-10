@@ -29,12 +29,17 @@ class ExternalStorageController extends Controller {
 	*/
 	public function getExternalStorageConfigurationForSpecificFile(int $fileId): DataResponse {
         try {
+            $user = $this->userSession->getUser();
+
+            $this->logger->info("CIDgravity - received call on controller for getExternalStorageConfigurationForSpecificFile", [
+                "fileId" => $fileId,
+                "user" => json_encode($user),
+            ]);
 
             if (!is_int($fileId)) {
                 return new DataResponse(['error' => 'invalid param fileId provided'], Http::STATUS_BAD_REQUEST);
             }
 
-            $user = $this->userSession->getUser();
             if (!$user) {
                 return new DataResponse(['error' => 'user not logged in'], Http::STATUS_INTERNAL_SERVER_ERROR);
             }
@@ -60,11 +65,17 @@ class ExternalStorageController extends Controller {
 	 */
 	public function getMetadataForSpecificFile(string $filePath): DataResponse {
         try {
+            $user = $this->userSession->getUser();
+
+            $this->logger->info("CIDgravity - received call on controller for getMetadataForSpecificFile", [
+                "filePath" => $filePath,
+                "user" => json_encode($user),
+            ]);
+
             if (empty($filePath) || !is_string($filePath) || trim($filePath) === '' || $filePath === '/') {
                 return new DataResponse(['success' => false, 'error' => 'invalid or missing file path'], Http::STATUS_BAD_REQUEST);
             }
 
-            $user = $this->userSession->getUser();
             if (!$user) {
                 return new DataResponse(['success' => false, 'error' => 'user not authenticated'], Http::STATUS_UNAUTHORIZED);
             }
