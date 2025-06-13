@@ -67,7 +67,7 @@
 		"eslint-config-standard": "^17.1.0",
 		"eslint-import-resolver-exports": "^1.0.0-beta.5",
 		"eslint-plugin-import": "^2.31.0",
-		"eslint-plugin-jsdoc": "^50.7.1",
+		"eslint-plugin-jsdoc": "^51.0.1",
 		"eslint-plugin-n": "^17.19.0",
 		"eslint-plugin-promise": "^7.2.1",
 		"eslint-plugin-vue": "^10.1.0",
