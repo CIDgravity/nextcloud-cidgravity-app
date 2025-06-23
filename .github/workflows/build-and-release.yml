@@ -61,7 +61,7 @@ jobs:
           generate_release_notes: true
       
       - name: Upload signed archive to release
-        uses: svenstaro/upload-release-action@2.9.0
+        uses: svenstaro/upload-release-action@2.10.0
         id: attach_to_release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
