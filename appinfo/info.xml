@@ -45,6 +45,6 @@ With CIDgravity, users can continue working within the familiar Nextcloud interf
     <website>https://cidgravity.com</website>
 	<repository type="git">https://github.com/CIDgravity/nextcloud-cidgravity-app</repository>
 	<dependencies>
-		<nextcloud min-version="29" max-version="31" />
+		<nextcloud min-version="29" max-version="32" />
     </dependencies>
 </info>
