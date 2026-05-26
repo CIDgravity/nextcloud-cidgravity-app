@@ -156,9 +156,9 @@
 
 <script>
 import TabLinkEntrySimple from '../components/TabLinkEntrySimple.vue'
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js'
-import NcIconSvgWrapper from '@nextcloud/vue/dist/Components/NcIconSvgWrapper.js'
+import NcActionButton from '@nextcloud/vue/components/NcActionButton'
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
+import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import AlertCircleOutlineIcon from 'vue-material-design-icons/AlertCircleOutline.vue'
 
 import CopyIcon from 'vue-material-design-icons/ContentCopy.vue'
@@ -327,14 +327,6 @@ export default {
 		isDwebGatewayUsed() {
 			return this.ipfsGateway === 'https://dweb.link/ipfs'
 		},
-	},
-
-	beforeUnmount() {
-		try {
-			this.tab.$destroy()
-		} catch (error) {
-			console.error('Unable to unmount CidgravityTab', error)
-		}
 	},
 
 	methods: {
