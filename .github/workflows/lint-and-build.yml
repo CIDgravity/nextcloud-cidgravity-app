@@ -6,6 +6,9 @@ on:
     # draft PR is promoted to ready. The job-level `if` below skips while
     # the PR is still in draft state.
     types: ['opened', 'edited', 'reopened', 'synchronize', 'ready_for_review']
+  # Diagnostic: lets us trigger the workflow manually from the Actions tab
+  # while we investigate why pull_request events aren't firing.
+  workflow_dispatch:
 
 permissions:
   contents: read
