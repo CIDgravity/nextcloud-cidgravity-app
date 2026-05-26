@@ -1,0 +1,127 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "Europe/Paris",
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "rangeStrategy": "bump",
+  "rebaseWhen": "behind-base-branch",
+  "minimumReleaseAge": "3 days",
+  "lockFileMaintenance": {
+    "description": "Refresh lockfiles weekly so transitive deps don't drift even when no package.json range changes.",
+    "enabled": true,
+    "schedule": ["before 6am on monday"],
+    "automerge": true,
+    "automergeType": "branch"
+  },
+  "vulnerabilityAlerts": {
+    "description": "Security fixes bypass the weekly schedule, the minimum-release-age soak, and auto-merge once CI is green.",
+    "labels": ["security"],
+    "automerge": true,
+    "schedule": [],
+    "minimumReleaseAge": "0 days"
+  },
+  "packageRules": [
+    {
+      "description": "Group all @nextcloud/* packages — peer deps couple them, so they should ship as one reviewable PR.",
+      "matchPackageNames": ["@nextcloud/**"],
+      "groupName": "@nextcloud packages"
+    },
+    {
+      "description": "Group all Babel packages (single monorepo, lockstep releases).",
+      "matchPackageNames": ["@babel/**", "babel-loader"],
+      "groupName": "Babel"
+    },
+    {
+      "description": "Group the ESLint + Stylelint linter stack so rule-config churn lands together.",
+      "matchPackageNames": [
+        "eslint",
+        "eslint-**",
+        "@stylistic/**",
+        "@vue/eslint-config-typescript",
+        "stylelint",
+        "stylelint-**"
+      ],
+      "groupName": "Lint stack"
+    },
+    {
+      "description": "Group the Vue ecosystem — Vue + vue-loader + Vue plugins move together with breaking-change implications.",
+      "matchPackageNames": [
+        "vue",
+        "vue-loader",
+        "vue-material-design-icons",
+        "@vue/**"
+      ],
+      "groupName": "Vue ecosystem"
+    },
+    {
+      "description": "Group webpack + its loaders/plugins — they share peer-dep constraints.",
+      "matchPackageNames": [
+        "webpack",
+        "webpack-**",
+        "css-loader",
+        "sass",
+        "sass-loader",
+        "style-loader",
+        "url-loader",
+        "node-polyfill-webpack-plugin",
+        "csp-html-webpack-plugin",
+        "postcss-html",
+        "postcss-selector-parser"
+      ],
+      "groupName": "Build chain"
+    },
+    {
+      "description": "Group all GitHub Actions bumps.",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Group all Composer (PHP) dependencies.",
+      "matchManagers": ["composer"],
+      "groupName": "Composer dependencies"
+    },
+    {
+      "description": "Don't touch nextcloud/ocp automatically — its dev-stableXX ref must follow info.xml max-version, which is a deliberate compat decision.",
+      "matchPackageNames": ["nextcloud/ocp"],
+      "enabled": false
+    },
+    {
+      "description": "Don't auto-PR Vue or @nextcloud/{vue,dialogs} majors — they carry breaking changes that need coordinated source rewrites.",
+      "matchPackageNames": ["vue", "@nextcloud/vue", "@nextcloud/dialogs"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Automerge GitHub Actions minor + patch + digest updates — low risk, often.",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Automerge devDependency patch updates — bug-fix-only churn that doesn't need eyes.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "pin"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Never automerge runtime @nextcloud/* updates — their minors regularly ship breaking changes per Nextcloud's release policy.",
+      "matchPackageNames": ["@nextcloud/**"],
+      "matchDepTypes": ["dependencies"],
+      "automerge": false
+    },
+    {
+      "description": "Never automerge any major bump anywhere.",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ]
+}
