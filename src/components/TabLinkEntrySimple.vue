@@ -11,11 +11,12 @@
 				</div>
 			</a>
 
-			<NcActions v-if="$slots['default']"
+			<NcActions
+				v-if="$slots['default']"
 				ref="actionsComponent"
 				:inline="1"
 				class="sharing-entry__actions"
-				menu-align="right"
+				menuAlign="right"
 				:aria-expanded="ariaExpandedValue">
 				<slot />
 			</NcActions>
@@ -32,11 +33,12 @@
 				</p>
 			</div>
 
-			<NcActions v-if="$slots['default']"
+			<NcActions
+				v-if="$slots['default']"
 				ref="actionsComponent"
 				:inline="1"
 				class="sharing-entry__actions"
-				menu-align="right"
+				menuAlign="right"
 				:aria-expanded="ariaExpandedValue">
 				<slot />
 			</NcActions>
@@ -59,18 +61,22 @@ export default {
 			type: String,
 			default: '',
 		},
+
 		subtitle: {
 			type: String,
 			default: '',
 		},
+
 		isUnique: {
 			type: Boolean,
 			default: true,
 		},
+
 		ariaExpanded: {
 			type: Boolean,
 			default: null,
 		},
+
 		link: {
 			type: String,
 			default: '',
@@ -84,6 +90,7 @@ export default {
 			}
 			return this.ariaExpanded ? 'true' : 'false'
 		},
+
 		hasLink() {
 			return this.link !== ''
 		},
