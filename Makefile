@@ -35,10 +35,10 @@ lint-fix:
 	npm run lint:fix
 
 npm-init:
-	npm ci --legacy-peer-deps
+	npm ci
 
 npm-update:
-	npm update --legacy-peer-deps
+	npm update
 
 clean:
 	rm -rf js/*
