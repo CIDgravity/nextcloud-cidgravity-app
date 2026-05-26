@@ -2,7 +2,7 @@ import Vue from 'vue'
 import axios from '@nextcloud/axios'
 
 import { generateOcsUrl } from '@nextcloud/router'
-import { translate, translatePlural } from 'nextcloud-l10n'
+import { translate, translatePlural } from '@nextcloud/l10n'
 
 import GatewayTab from './views/GatewayTab.vue'
 
