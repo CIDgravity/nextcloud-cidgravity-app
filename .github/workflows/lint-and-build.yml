@@ -1,0 +1,37 @@
+name: Lint and Build
+
+on:
+  pull_request:
+    # `ready_for_review` is needed so the workflow fires the first time a
+    # draft PR is promoted to ready. The job-level `if` below skips while
+    # the PR is still in draft state.
+    types: ['opened', 'edited', 'reopened', 'synchronize', 'ready_for_review']
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-build:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    name: Production build (runs ESLint + Stylelint via webpack)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        # `npm run build` runs webpack in production mode, which invokes
+        # eslint-webpack-plugin and stylelint-webpack-plugin with
+        # failOnError. So this single step covers JS lint + CSS/SCSS lint
+        # + bundle build in one go.
+        run: npm run build
