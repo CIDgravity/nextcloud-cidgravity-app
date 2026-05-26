@@ -10,6 +10,7 @@
   "prHourlyLimit": 2,
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch",
+  "minimumReleaseAge": "3 days",
   "lockFileMaintenance": {
     "description": "Refresh lockfiles weekly so transitive deps don't drift even when no package.json range changes.",
     "enabled": true,
@@ -18,10 +19,11 @@
     "automergeType": "branch"
   },
   "vulnerabilityAlerts": {
-    "description": "Security fixes bypass the weekly schedule and auto-merge once CI is green.",
+    "description": "Security fixes bypass the weekly schedule, the minimum-release-age soak, and auto-merge once CI is green.",
     "labels": ["security"],
     "automerge": true,
-    "schedule": []
+    "schedule": [],
+    "minimumReleaseAge": "0 days"
   },
   "packageRules": [
     {
