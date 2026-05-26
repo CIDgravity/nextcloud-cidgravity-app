@@ -91,6 +91,17 @@
       "enabled": false
     },
     {
+      "description": "Don't bump the PHP floor — composer.json `php ^8.2` is a deliberate min-version statement tied to the Nextcloud versions we support, not something to drift with each new PHP release.",
+      "matchPackageNames": ["php"],
+      "matchManagers": ["composer"],
+      "enabled": false
+    },
+    {
+      "description": "Cap phpunit at <12: phpunit 12 needs PHP ^8.3 and phpunit 13 needs PHP ^8.4. Our floor is PHP 8.2. Revisit when raising the PHP minimum (which would also require bumping info.xml min-version).",
+      "matchPackageNames": ["phpunit/phpunit"],
+      "allowedVersions": "<12"
+    },
+    {
       "description": "Cap sass-loader: @nextcloud/webpack-vue-config@7.0.2 peer-pins sass-loader ^16. Remove this rule when upstream relaxes the peer.",
       "matchPackageNames": ["sass-loader"],
       "allowedVersions": "<17"
