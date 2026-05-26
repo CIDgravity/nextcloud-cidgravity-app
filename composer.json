@@ -15,14 +15,14 @@
 		}
 	},
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "sabre/dav": "^4.7"
     },
     "require-dev": {
         "nextcloud/ocp": "dev-stable32",
 		"roave/security-advisories": "dev-latest",
-        "bamarni/composer-bin-plugin": "^1.9",
-        "phpunit/phpunit": "^10.5",
+        "bamarni/composer-bin-plugin": "^1.9.1",
+        "phpunit/phpunit": "^11.5",
         "nextcloud/coding-standard": "^1.5"
     },
     "extra": {
@@ -35,7 +35,7 @@
         "optimize-autoloader": true,
         "sort-packages": true,
         "platform": {
-            "php": "8.1"
+            "php": "8.2"
         },
         "allow-plugins": {
             "bamarni/composer-bin-plugin": true

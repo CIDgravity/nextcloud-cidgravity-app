@@ -16,8 +16,8 @@ jobs:
     name: "Release: build, sign, release and publish to store"
     strategy:
       matrix:
-        php-versions: ['8.1']
-        node-versions: ['20']
+        php-versions: ['8.2']
+        node-versions: ['24']
 
     steps:
       - name: Checkout code
