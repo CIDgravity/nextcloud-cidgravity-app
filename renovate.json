@@ -91,6 +91,21 @@
       "enabled": false
     },
     {
+      "description": "Cap sass-loader: @nextcloud/webpack-vue-config@7.0.2 peer-pins sass-loader ^16. Remove this rule when upstream relaxes the peer.",
+      "matchPackageNames": ["sass-loader"],
+      "allowedVersions": "<17"
+    },
+    {
+      "description": "Cap webpack-cli: @nextcloud/webpack-vue-config@7.0.2 peer-pins webpack-cli ^6. Remove this rule when upstream relaxes the peer.",
+      "matchPackageNames": ["webpack-cli"],
+      "allowedVersions": "<7"
+    },
+    {
+      "description": "Cap node-polyfill-webpack-plugin: @nextcloud/webpack-vue-config@7.0.2 peer-pins it to exact 4.0.0. Remove this rule when upstream relaxes the peer.",
+      "matchPackageNames": ["node-polyfill-webpack-plugin"],
+      "allowedVersions": "<4.1.0"
+    },
+    {
       "description": "Don't auto-PR Vue or @nextcloud/{vue,dialogs} majors — they carry breaking changes that need coordinated source rewrites.",
       "matchPackageNames": ["vue", "@nextcloud/vue", "@nextcloud/dialogs"],
       "matchUpdateTypes": ["major"],
