@@ -13,6 +13,16 @@ webpackConfig.stats = {
 	modules: false,
 }
 
+// Required for node-polyfill-webpack-plugin@4 (node-stdlib-browser) and
+// other ESM-strict deps (@nextcloud/files, axios, webdav). Without this,
+// webpack rejects extensionless imports inside .mjs / "type":"module" packages.
+webpackConfig.module.rules.push({
+	test: /\.m?js$/,
+	resolve: {
+		fullySpecified: false,
+	},
+})
+
 const appId = 'cidgravity'
 webpackConfig.entry = {
 	main: { import: path.join(__dirname, 'src', 'main.js'), filename: appId + '-main.js' },
