@@ -1,0 +1,26 @@
+# Dependabot is NEUTRALIZED here on purpose — Renovate owns dependency updates
+# (see renovate.json). This file is the authoritative repo-level kill switch for
+# Dependabot *version updates*, which were still firing from GitHub's fileless
+# "default setup" (enabled at the repo/org level) even after the old config was
+# deleted. A committed config takes precedence over that default setup.
+#
+# `open-pull-requests-limit: 0` disables version updates per ecosystem without
+# touching Dependabot security updates or alerts. Remove this file (or raise the
+# limits) only if you ever decide to let Dependabot own version updates again.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+  - package-ecosystem: composer
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
