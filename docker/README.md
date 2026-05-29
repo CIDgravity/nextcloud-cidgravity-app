@@ -46,6 +46,7 @@ From the repo root (these wrap the `docker compose` commands below):
 | `make docker-logs` | Follow the Nextcloud logs |
 | `make docker-occ CMD="app:list"` | Run an occ command |
 | `make docker-shell` | Open a shell in the Nextcloud container as `www-data` |
+| `make docker-minimal` | Disable every app not needed to test the app (lighter instance) |
 | `make docker-clean` | Tear down **including data volumes** (next up = clean install) |
 
 ## Testing the app
@@ -59,6 +60,27 @@ From the repo root (these wrap the `docker compose` commands below):
    docker compose exec --user www-data nextcloud \
      php occ config:system:set cidgravity_gateway_external_storage_enabled --value=true --type=boolean
    ```
+
+## Minimal instance
+
+To keep the instance light, `MINIMAL_APPS=true` (the default in `.env.example`)
+disables every default/onboarding/sharing app that isn't needed to test the app
+— dashboard, firstrunwizard, activity, photos, text, files_sharing, etc. Only
+the app under test (`APP_ID`), its dependencies (`EXTRA_APPS`), anything in
+`KEEP_APPS`, and Nextcloud's always-enabled core (files, dav, settings, theming,
+…) stay enabled.
+
+- It runs automatically on a **fresh install**. Re-run anytime with
+  `make docker-minimal` (idempotent).
+- Keep extra apps by listing them in `KEEP_APPS`, e.g.
+  `KEEP_APPS=files_versions files_trashbin`.
+- Turn it off with `MINIMAL_APPS=false` to get a stock Nextcloud.
+- Apps are *disabled*, not removed: shipped apps live in the image and would be
+  restored on a clean reinstall, so disabling is the right (and reversible) lever.
+
+> If you already have a `docker/.env` from before this option existed, add
+> `MINIMAL_APPS=true` to it (or delete `docker/.env` and re-run `make docker-up`
+> to regenerate it from `.env.example`).
 
 ## Frontend dev loop
 
@@ -124,4 +146,8 @@ is mounted at `custom_apps/${APP_ID}` and enabled by id.
 - **"Cannot read app" / permission errors on the mount.** `www-data` (uid 33)
   inside the container must be able to read the checkout. Make it world-readable:
   `chmod -R a+rX ..` (run from this folder).
+- **Edited `hooks/enable-app.sh` but nothing changed?** Single-file bind mounts
+  pin the file's inode, so a *running* container keeps the old copy. Recreate it:
+  `docker compose up -d --force-recreate nextcloud` (or `make docker-down && make docker-up`).
+  Editing the app's own PHP/JS is unaffected — that's a directory mount and updates live.
 - **Port already in use.** Change `NC_PORT` in `.env`.

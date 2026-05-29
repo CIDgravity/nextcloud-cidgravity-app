@@ -83,11 +83,17 @@ docker-logs:
 
 # Run an occ command, e.g. `make docker-occ CMD="app:list"`.
 docker-occ:
-	$(docker_compose) exec --user www-data nextcloud php occ $(CMD)
+	$(docker_compose) exec -T --user www-data nextcloud php occ $(CMD)
 
 # Open a shell in the Nextcloud container as the web user.
 docker-shell:
 	$(docker_compose) exec --user www-data nextcloud bash
+
+# Disable every app not needed to test the app (lighter instance). Re-runnable;
+# honours APP_ID / EXTRA_APPS / KEEP_APPS. Core apps that can't be disabled stay.
+docker-minimal:
+	$(docker_compose) exec -T -e FORCE_MINIMAL=1 -e MINIMAL_APPS=true --user www-data \
+		nextcloud /docker-entrypoint-hooks.d/before-starting/enable-app.sh
 
 # Tear everything down INCLUDING data volumes (next `docker-up` is a clean install).
 docker-clean:

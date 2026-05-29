@@ -39,6 +39,19 @@ services:
   nextcloud:
     image: nextcloud:${NEXTCLOUD_VERSION:-32}-apache
     restart: unless-stopped
+    # Bind-mounting the app into custom_apps/<APP_ID> makes Docker create the
+    # parent custom_apps as root:root. The image only fixes its ownership when
+    # it's empty, so it stays root and breaks the App Store / Settings -> Apps
+    # ("Cannot write into apps directory"). Chown it as root here, then hand off
+    # to the stock entrypoint (which runs the hooks as www-data). "$$@" passes
+    # the image's default command (apache2-foreground) through untouched.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - chown www-data:www-data /var/www/html/custom_apps 2>/dev/null || true; exec /entrypoint.sh "$$@"
+      - --
+    # Overriding entrypoint clears the image's default CMD, so restore it.
+    command: ["apache2-foreground"]
     ports:
       - "${NC_PORT:-8080}:80"
     depends_on:
@@ -59,13 +72,18 @@ services:
       # --- Read by the enable-app.sh entrypoint hook (runs inside this container) ---
       APP_ID: ${APP_ID:-cidgravity}
       EXTRA_APPS: ${EXTRA_APPS:-files_external}
+      MINIMAL_APPS: ${MINIMAL_APPS:-false}
+      KEEP_APPS: ${KEEP_APPS:-}
     volumes:
       # Persist the Nextcloud install (config, data, shipped apps) across restarts.
       - nextcloud_data:/var/www/html
       # Mount THIS repo as the app under test. Requires the checkout to be
       # world-readable so www-data can read it (normal for a fresh clone).
       - ../:/var/www/html/custom_apps/${APP_ID:-cidgravity}
-      # Auto-enable EXTRA_APPS + APP_ID on every boot (idempotent).
+      # Auto-enable EXTRA_APPS + APP_ID. Wired into both hooks (idempotent):
+      # post-installation fires once after a fresh install; before-starting runs
+      # on every boot (covers restarts and reused volumes).
+      - ./hooks/enable-app.sh:/docker-entrypoint-hooks.d/post-installation/enable-app.sh:ro
       - ./hooks/enable-app.sh:/docker-entrypoint-hooks.d/before-starting/enable-app.sh:ro
 
 volumes:

@@ -65,6 +65,18 @@ make build-js-production
 
 * Enable the app in the Apps section of your Nextcloud.
 
+### Local testing with Docker
+
+No Nextcloud to test against? This repo ships a disposable Docker Compose stack
+(Nextcloud + PostgreSQL + Redis) that mounts the app and enables it automatically:
+
+```
+make docker-up      # then open http://localhost:8080  (admin / admin)
+```
+
+See [docker/README.md](docker/README.md) for details (target versions, minimal
+mode, reuse for other apps, troubleshooting).
+
 Here’s an improved and more professional version of that README section:
 
 ---
