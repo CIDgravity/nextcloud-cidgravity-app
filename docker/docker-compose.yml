@@ -1,0 +1,73 @@
+# Local, disposable Nextcloud test stack.
+#
+# Standard 3-service setup (Nextcloud + PostgreSQL + Redis) that mounts the app
+# living in this repo into custom_apps/ and auto-enables it on boot.
+#
+# Reuse for another Nextcloud app: copy this `docker/` folder into that repo and
+# change APP_ID / EXTRA_APPS in `.env`. Nothing below needs editing.
+#
+#   cp .env.example .env
+#   docker compose up -d
+#   open http://localhost:8080   (admin / admin)
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nextcloud}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nextcloud} -d ${POSTGRES_DB:-nextcloud}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nextcloud:
+    image: nextcloud:${NEXTCLOUD_VERSION:-32}-apache
+    restart: unless-stopped
+    ports:
+      - "${NC_PORT:-8080}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # --- Non-interactive auto-install (official image) ---
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nextcloud}
+      REDIS_HOST: redis
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD:-admin}
+      NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS:-localhost}
+      # --- Read by the enable-app.sh entrypoint hook (runs inside this container) ---
+      APP_ID: ${APP_ID:-cidgravity}
+      EXTRA_APPS: ${EXTRA_APPS:-files_external}
+    volumes:
+      # Persist the Nextcloud install (config, data, shipped apps) across restarts.
+      - nextcloud_data:/var/www/html
+      # Mount THIS repo as the app under test. Requires the checkout to be
+      # world-readable so www-data can read it (normal for a fresh clone).
+      - ../:/var/www/html/custom_apps/${APP_ID:-cidgravity}
+      # Auto-enable EXTRA_APPS + APP_ID on every boot (idempotent).
+      - ./hooks/enable-app.sh:/docker-entrypoint-hooks.d/before-starting/enable-app.sh:ro
+
+volumes:
+  db_data:
+  nextcloud_data:

@@ -1,0 +1,2 @@
+# Local overrides — never commit credentials/ports.
+.env
