@@ -74,6 +74,11 @@ services:
       EXTRA_APPS: ${EXTRA_APPS:-files_external}
       MINIMAL_APPS: ${MINIMAL_APPS:-false}
       KEEP_APPS: ${KEEP_APPS:-}
+      # Optional: auto-create one external storage mount on boot.
+      EXT_STORAGE_MOUNT: ${EXT_STORAGE_MOUNT:-}
+      EXT_STORAGE_BACKEND: ${EXT_STORAGE_BACKEND:-cidgravity}
+      EXT_STORAGE_AUTH: ${EXT_STORAGE_AUTH:-password::password}
+      EXT_STORAGE_CONFIG: ${EXT_STORAGE_CONFIG:-}
     volumes:
       # Persist the Nextcloud install (config, data, shipped apps) across restarts.
       - nextcloud_data:/var/www/html

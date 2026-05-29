@@ -59,3 +59,23 @@ if [ "${MINIMAL_APPS:-false}" = "true" ]; then
 		;;
 	esac
 fi
+
+# Optionally create ONE external storage mount (idempotent). Driven entirely by
+# env so the stack stays app-agnostic; .env pre-fills the CIDgravity defaults.
+# Skipped unless EXT_STORAGE_MOUNT is set. Config values must not contain spaces.
+if [ -n "${EXT_STORAGE_MOUNT:-}" ]; then
+	exists=$(occ files_external:list --output=json 2>/dev/null | php -r '
+		$d = json_decode(stream_get_contents(STDIN), true) ?: [];
+		$mp = "/" . getenv("EXT_STORAGE_MOUNT");
+		foreach ($d as $m) { if (($m["mount_point"] ?? "") === $mp) { echo "yes"; break; } }')
+	if [ "$exists" = "yes" ]; then
+		echo "[enable-app] external storage '$EXT_STORAGE_MOUNT' already exists; leaving it."
+	else
+		echo "[enable-app] creating external storage '$EXT_STORAGE_MOUNT' (${EXT_STORAGE_BACKEND:-cidgravity})"
+		( set --
+		  for kv in ${EXT_STORAGE_CONFIG:-}; do set -- "$@" -c "$kv"; done
+		  occ files_external:create "$EXT_STORAGE_MOUNT" \
+			"${EXT_STORAGE_BACKEND:-cidgravity}" "${EXT_STORAGE_AUTH:-password::password}" "$@"
+		) || echo "[enable-app] could not create external storage '$EXT_STORAGE_MOUNT'"
+	fi
+fi

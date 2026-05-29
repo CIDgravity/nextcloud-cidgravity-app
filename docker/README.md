@@ -61,6 +61,30 @@ From the repo root (these wrap the `docker compose` commands below):
      php occ config:system:set cidgravity_gateway_external_storage_enabled --value=true --type=boolean
    ```
 
+## Auto-create the external storage
+
+Instead of adding the CIDgravity storage by hand in the UI every time, you can
+have one mount created automatically on boot. Set these in `.env`:
+
+```sh
+EXT_STORAGE_MOUNT=CIDgravity      # mount-point name (empty = don't create)
+EXT_STORAGE_CONFIG=host=https://nextcloud.twinquasar.io secure=true root=PublicFilecoin default_ipfs_gateway=https://ipfs.io/ipfs user=YOUR_USER password=YOUR_PASSWORD
+```
+
+`EXT_STORAGE_BACKEND` (`cidgravity`) and `EXT_STORAGE_AUTH` (`password::password`)
+default correctly; the config keys match the CIDgravity backend
+([CIDgravityBackendService](../lib/Service/Backend/CIDgravityBackendService.php)).
+The mount is a **system mount applicable to all users** and is created
+idempotently — re-runs leave an existing mount untouched.
+
+Notes:
+- Leave `EXT_STORAGE_MOUNT` empty to skip and configure manually instead.
+- Values in `EXT_STORAGE_CONFIG` must not contain spaces.
+- Credentials live only in your local (gitignored) `.env`.
+- The mechanism is generic — point `EXT_STORAGE_BACKEND`/`_AUTH`/`_CONFIG` at any
+  external-storage backend to reuse it for another app.
+- Verify with `make docker-occ CMD="files_external:list"`.
+
 ## Minimal instance
 
 To keep the instance light, `MINIMAL_APPS=true` (the default in `.env.example`)

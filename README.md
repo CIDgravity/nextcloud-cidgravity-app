@@ -75,7 +75,7 @@ make docker-up      # then open http://localhost:8080  (admin / admin)
 ```
 
 See [docker/README.md](docker/README.md) for details (target versions, minimal
-mode, reuse for other apps, troubleshooting).
+mode, auto-creating the external storage, reuse for other apps, troubleshooting).
 
 Here’s an improved and more professional version of that README section:
 
