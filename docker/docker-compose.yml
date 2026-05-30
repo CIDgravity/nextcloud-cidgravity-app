@@ -1,0 +1,107 @@
+# Local, disposable Nextcloud test stack.
+#
+# Standard 3-service setup (Nextcloud + PostgreSQL + Redis) that mounts the app
+# living in this repo into custom_apps/ and auto-enables it on boot.
+#
+# Reuse for another Nextcloud app: copy this `docker/` folder into that repo and
+# change APP_ID / EXTRA_APPS in `.env`. Nothing below needs editing.
+#
+#   cp .env.example .env
+#   docker compose up -d
+#   open http://localhost:8080   (admin / admin)
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nextcloud}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nextcloud} -d ${POSTGRES_DB:-nextcloud}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nextcloud:
+    image: nextcloud:${NEXTCLOUD_VERSION:-32}-apache
+    restart: unless-stopped
+    # Bind-mounting the app into custom_apps/<APP_ID> makes Docker create the
+    # parent custom_apps as root:root. The image only fixes its ownership when
+    # it's empty, so it stays root and breaks the App Store / Settings -> Apps
+    # ("Cannot write into apps directory"). Chown it as root here, then hand off
+    # to the stock entrypoint (which runs the hooks as www-data). "$$@" passes
+    # the image's default command (apache2-foreground) through untouched.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - chown www-data:www-data /var/www/html/custom_apps 2>/dev/null || true; exec /entrypoint.sh "$$@"
+      - --
+    # Overriding entrypoint clears the image's default CMD, so restore it.
+    command: ["apache2-foreground"]
+    ports:
+      - "${NC_PORT:-8080}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # --- Non-interactive auto-install (official image) ---
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nextcloud}
+      REDIS_HOST: redis
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD:-admin}
+      NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS:-localhost}
+      # --- Read by the enable-app.sh entrypoint hook (runs inside this container) ---
+      APP_ID: ${APP_ID:-cidgravity}
+      EXTRA_APPS: ${EXTRA_APPS:-files_external}
+      MINIMAL_APPS: ${MINIMAL_APPS:-false}
+      KEEP_APPS: ${KEEP_APPS:-}
+      # Optional: Nextcloud system config to set on boot (key=value pairs).
+      NC_CONFIG: ${NC_CONFIG:-}
+      # Optional: auto-create external storage mounts on boot (up to 3 slots;
+      # empty _MOUNT = skip). Driven from .env.
+      EXT_STORAGE_1_MOUNT: ${EXT_STORAGE_1_MOUNT:-}
+      EXT_STORAGE_1_BACKEND: ${EXT_STORAGE_1_BACKEND:-cidgravity}
+      EXT_STORAGE_1_AUTH: ${EXT_STORAGE_1_AUTH:-password::password}
+      EXT_STORAGE_1_CONFIG: ${EXT_STORAGE_1_CONFIG:-}
+      EXT_STORAGE_2_MOUNT: ${EXT_STORAGE_2_MOUNT:-}
+      EXT_STORAGE_2_BACKEND: ${EXT_STORAGE_2_BACKEND:-cidgravity}
+      EXT_STORAGE_2_AUTH: ${EXT_STORAGE_2_AUTH:-password::password}
+      EXT_STORAGE_2_CONFIG: ${EXT_STORAGE_2_CONFIG:-}
+      EXT_STORAGE_3_MOUNT: ${EXT_STORAGE_3_MOUNT:-}
+      EXT_STORAGE_3_BACKEND: ${EXT_STORAGE_3_BACKEND:-cidgravity}
+      EXT_STORAGE_3_AUTH: ${EXT_STORAGE_3_AUTH:-password::password}
+      EXT_STORAGE_3_CONFIG: ${EXT_STORAGE_3_CONFIG:-}
+    volumes:
+      # Persist the Nextcloud install (config, data, shipped apps) across restarts.
+      - nextcloud_data:/var/www/html
+      # Mount THIS repo as the app under test. Requires the checkout to be
+      # world-readable so www-data can read it (normal for a fresh clone).
+      - ../:/var/www/html/custom_apps/${APP_ID:-cidgravity}
+      # Auto-enable EXTRA_APPS + APP_ID. Wired into both hooks (idempotent):
+      # post-installation fires once after a fresh install; before-starting runs
+      # on every boot (covers restarts and reused volumes).
+      - ./hooks/enable-app.sh:/docker-entrypoint-hooks.d/post-installation/enable-app.sh:ro
+      - ./hooks/enable-app.sh:/docker-entrypoint-hooks.d/before-starting/enable-app.sh:ro
+
+volumes:
+  db_data:
+  nextcloud_data:

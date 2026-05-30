@@ -8,6 +8,10 @@ package_name=$(app_name)
 cert_dir=$(HOME)/.nextcloud/certificates
 version+=master
 
+# Local Nextcloud test stack (see docker/README.md)
+compose_file=$(CURDIR)/docker/docker-compose.yml
+docker_compose=docker compose -f $(compose_file)
+
 all: dev-setup build-js-production
 
 dev-setup: clean-dev npm-init
@@ -47,6 +51,54 @@ clean:
 clean-dev: clean
 	rm -rf node_modules
 
+# --- Local Nextcloud test stack ---------------------------------------------
+
+# Create docker/.env from the example on first use (won't overwrite an existing one).
+docker-env:
+	@test -f $(CURDIR)/docker/.env || cp $(CURDIR)/docker/.env.example $(CURDIR)/docker/.env
+
+# Start the stack in the background (installs Nextcloud + enables the app on first boot).
+docker-up: docker-env
+	$(docker_compose) up -d
+
+# Stop and remove containers + network, keeping data volumes (fast to bring back up).
+docker-down:
+	$(docker_compose) down
+
+# Pause the containers without removing them.
+docker-stop:
+	$(docker_compose) stop
+
+# Restart only the Nextcloud container (e.g. after changing PHP code).
+docker-restart:
+	$(docker_compose) restart nextcloud
+
+# Show container status.
+docker-ps:
+	$(docker_compose) ps
+
+# Follow the Nextcloud logs (Ctrl-C to stop following).
+docker-logs:
+	$(docker_compose) logs -f nextcloud
+
+# Run an occ command, e.g. `make docker-occ CMD="app:list"`.
+docker-occ:
+	$(docker_compose) exec -T --user www-data nextcloud php occ $(CMD)
+
+# Open a shell in the Nextcloud container as the web user.
+docker-shell:
+	$(docker_compose) exec --user www-data nextcloud bash
+
+# Disable every app not needed to test the app (lighter instance). Re-runnable;
+# honours APP_ID / EXTRA_APPS / KEEP_APPS. Core apps that can't be disabled stay.
+docker-minimal:
+	$(docker_compose) exec -T -e FORCE_MINIMAL=1 -e MINIMAL_APPS=true --user www-data \
+		nextcloud /docker-entrypoint-hooks.d/before-starting/enable-app.sh
+
+# Tear everything down INCLUDING data volumes (next `docker-up` is a clean install).
+docker-clean:
+	$(docker_compose) down -v
+
 create-tag:
 	git tag -a v$(version) -m "Tagging the $(version) release."
 	git push origin v$(version)
@@ -59,6 +111,7 @@ appstore:
 	--exclude=/build \
 	--exclude=composer.json \
 	--exclude=composer.lock \
+	--exclude=docker \
 	--exclude=docs \
 	--exclude=.drone.yml \
 	--exclude=.eslintignore \
