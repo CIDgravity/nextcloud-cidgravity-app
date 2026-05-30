@@ -136,8 +136,9 @@ Notes:
 
 ## Minimal instance
 
-To keep the instance light, `MINIMAL_APPS=true` (the default in `.env.example`)
-disables every default/onboarding/sharing app that isn't needed to test the app
+To keep the instance light, `MINIMAL_APPS` is **on by default** (set
+`MINIMAL_APPS=false` to opt out). It disables every default/onboarding/sharing
+app that isn't needed to test the app
 — dashboard, firstrunwizard, activity, photos, text, files_sharing, etc. Only
 the app under test (`APP_ID`), its dependencies (`EXTRA_APPS`), anything in
 `KEEP_APPS`, and Nextcloud's always-enabled core (files, dav, settings, theming,

@@ -72,7 +72,7 @@ services:
       # --- Read by the enable-app.sh entrypoint hook (runs inside this container) ---
       APP_ID: ${APP_ID:-cidgravity}
       EXTRA_APPS: ${EXTRA_APPS:-files_external}
-      MINIMAL_APPS: ${MINIMAL_APPS:-false}
+      MINIMAL_APPS: ${MINIMAL_APPS:-true}
       KEEP_APPS: ${KEEP_APPS:-}
       # Optional: Nextcloud system config to set on boot (key=value pairs).
       NC_CONFIG: ${NC_CONFIG:-}
