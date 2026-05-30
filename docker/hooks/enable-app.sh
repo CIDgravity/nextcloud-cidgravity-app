@@ -41,6 +41,23 @@ if [ -n "${APP_ID:-}" ]; then
 	occ app:enable "$APP_ID" || echo "[enable-app] FAILED to enable '$APP_ID' (frontend built? version in range?)."
 fi
 
+# Optionally set Nextcloud system config on boot (idempotent). Space-separated
+# key=value pairs (values must not contain spaces); type is inferred:
+# true/false -> boolean, all-digits -> integer, everything else -> string.
+# e.g. NC_CONFIG="cidgravity_gateway_external_storage_enabled=true loglevel=0"
+for kv in ${NC_CONFIG:-}; do
+	key=${kv%%=*}
+	val=${kv#*=}
+	case "$val" in
+	true | false) type=boolean ;;
+	'' | *[!0-9]*) type=string ;;
+	*) type=integer ;;
+	esac
+	echo "[enable-app] config:system:set $key ($type) = $val"
+	occ config:system:set "$key" --value="$val" --type="$type" >/dev/null \
+		|| echo "[enable-app] could not set system config: $key"
+done
+
 # Minimal mode: disable every enabled app except the ones needed to test APP_ID.
 # Runs once on a fresh install (post-installation hook) or on demand
 # (FORCE_MINIMAL=1). Core apps that cannot be disabled (files, dav, settings,

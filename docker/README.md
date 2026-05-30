@@ -52,14 +52,31 @@ From the repo root (these wrap the `docker compose` commands below):
 ## Testing the app
 
 1. Log in as admin.
-2. Go to **Settings → Administration → External storage** — the **CIDgravity**
-   backend should appear in the "Add storage" dropdown.
-3. The optional gateway backend only shows up after enabling its flag:
+2. Go to **Settings → Administration → External storage** — both the
+   **CIDgravity** and **CIDgravity Gateway** backends appear in the "Add storage"
+   dropdown. (The gateway is enabled by default via `NC_CONFIG`; see below to
+   turn it off.)
 
-   ```sh
-   docker compose exec --user www-data nextcloud \
-     php occ config:system:set cidgravity_gateway_external_storage_enabled --value=true --type=boolean
-   ```
+## Nextcloud system config
+
+To change Nextcloud system config without editing `config.php` inside the
+container, list `key=value` pairs in `NC_CONFIG`; they're applied on every boot.
+Type is inferred — `true`/`false` → boolean, digits → integer, otherwise string.
+By default it enables the gateway backend; append more keys as needed:
+
+```sh
+NC_CONFIG=cidgravity_gateway_external_storage_enabled=true loglevel=0
+```
+
+Empty `NC_CONFIG` to disable the gateway backend (only the plain CIDgravity
+backend remains).
+
+- Values must not contain spaces.
+- **Changing `.env` needs a recreate, not a restart:** run `make docker-up`
+  again (Compose recreates the container with the new env). `make docker-restart`
+  keeps the old values.
+- For a quick one-off change to the running instance, use `make docker-occ
+  CMD="config:system:set …"` — it takes effect immediately, no recreate.
 
 ## Auto-create the external storage
 
