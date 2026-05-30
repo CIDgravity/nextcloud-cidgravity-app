@@ -48,6 +48,29 @@ From the repo root (these wrap the `docker compose` commands below):
 | `make docker-shell` | Open a shell in the Nextcloud container as `www-data` |
 | `make docker-minimal` | Disable every app not needed to test the app (lighter instance) |
 | `make docker-clean` | Tear down **including data volumes** (next up = clean install) |
+| `make docker-reset` | Wipe volumes **and** start fresh — apply changed `.env` from scratch |
+
+### Applying `.env` changes
+
+`docker-down`/`docker-up` keep the volumes, and a lot of state lives in the
+**database** — enabled apps, system config, and external-storage mounts. So:
+
+- **System config (`NC_CONFIG`) and app enable/minimal** are re-applied on every
+  boot, so `make docker-up` (which recreates the container with the new env)
+  picks those up.
+- **External-storage mounts (`EXT_STORAGE_*`)** are created idempotently — an
+  existing mount is *kept*, so editing its credentials/URLs in `.env` does **not**
+  update the mount already in the DB. New mount names (new slots) are created on
+  the next `docker-up`, but changes to existing ones need a clean DB.
+
+To apply changed `EXT_STORAGE_*` (or DB/admin values), reset from scratch:
+
+```sh
+make docker-reset      # = down -v && up -d
+```
+
+(Or edit the mount directly in the UI / `make docker-occ CMD="files_external:..."`
+if you don't want to wipe the instance.)
 
 ## Testing the app
 

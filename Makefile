@@ -99,6 +99,13 @@ docker-minimal:
 docker-clean:
 	$(docker_compose) down -v
 
+# Apply a changed .env from scratch: wipe volumes (DB + data), then reinstall.
+# Use this after editing EXT_STORAGE_* / DB / admin values, which live in the DB
+# and are otherwise kept across docker-down/up.
+docker-reset: docker-env
+	$(docker_compose) down -v
+	$(docker_compose) up -d
+
 create-tag:
 	git tag -a v$(version) -m "Tagging the $(version) release."
 	git push origin v$(version)
