@@ -77,22 +77,29 @@ if [ "${MINIMAL_APPS:-false}" = "true" ]; then
 	esac
 fi
 
-# Optionally create ONE external storage mount (idempotent). Driven entirely by
-# env so the stack stays app-agnostic; .env pre-fills the CIDgravity defaults.
-# Skipped unless EXT_STORAGE_MOUNT is set. Config values must not contain spaces.
-if [ -n "${EXT_STORAGE_MOUNT:-}" ]; then
-	exists=$(occ files_external:list --output=json 2>/dev/null | php -r '
-		$d = json_decode(stream_get_contents(STDIN), true) ?: [];
-		$mp = "/" . getenv("EXT_STORAGE_MOUNT");
-		foreach ($d as $m) { if (($m["mount_point"] ?? "") === $mp) { echo "yes"; break; } }')
-	if [ "$exists" = "yes" ]; then
-		echo "[enable-app] external storage '$EXT_STORAGE_MOUNT' already exists; leaving it."
+# Optionally create external storage mounts (idempotent). Define up to a few
+# mounts via indexed env vars EXT_STORAGE_<i>_{MOUNT,BACKEND,AUTH,CONFIG};
+# iteration stops at the first empty MOUNT. Generic (any backend) so the stack
+# stays app-agnostic. Config is space-separated key=value (no spaces in values).
+existing=$(occ files_external:list --output=json 2>/dev/null \
+	| php -r '$d=json_decode(stream_get_contents(STDIN),true) ?: []; foreach($d as $m){ echo ($m["mount_point"] ?? "")."\n"; }')
+i=1
+while :; do
+	eval "mount=\${EXT_STORAGE_${i}_MOUNT:-}"
+	[ -z "$mount" ] && break
+	eval "backend=\${EXT_STORAGE_${i}_BACKEND:-cidgravity}"
+	eval "auth=\${EXT_STORAGE_${i}_AUTH:-password::password}"
+	eval "config=\${EXT_STORAGE_${i}_CONFIG:-}"
+	if printf '%s\n' "$existing" | grep -Fxq "/$mount"; then
+		echo "[enable-app] external storage '$mount' already exists; leaving it."
+	elif ( set --
+		for kv in $config; do set -- "$@" -c "$kv"; done
+		echo "[enable-app] creating external storage '$mount' ($backend)"
+		occ files_external:create "$mount" "$backend" "$auth" "$@" ); then
+		existing="$existing
+/$mount"
 	else
-		echo "[enable-app] creating external storage '$EXT_STORAGE_MOUNT' (${EXT_STORAGE_BACKEND:-cidgravity})"
-		( set --
-		  for kv in ${EXT_STORAGE_CONFIG:-}; do set -- "$@" -c "$kv"; done
-		  occ files_external:create "$EXT_STORAGE_MOUNT" \
-			"${EXT_STORAGE_BACKEND:-cidgravity}" "${EXT_STORAGE_AUTH:-password::password}" "$@"
-		) || echo "[enable-app] could not create external storage '$EXT_STORAGE_MOUNT'"
+		echo "[enable-app] could not create external storage '$mount'"
 	fi
-fi
+	i=$((i + 1))
+done

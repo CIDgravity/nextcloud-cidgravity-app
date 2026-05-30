@@ -76,11 +76,20 @@ services:
       KEEP_APPS: ${KEEP_APPS:-}
       # Optional: Nextcloud system config to set on boot (key=value pairs).
       NC_CONFIG: ${NC_CONFIG:-}
-      # Optional: auto-create one external storage mount on boot.
-      EXT_STORAGE_MOUNT: ${EXT_STORAGE_MOUNT:-}
-      EXT_STORAGE_BACKEND: ${EXT_STORAGE_BACKEND:-cidgravity}
-      EXT_STORAGE_AUTH: ${EXT_STORAGE_AUTH:-password::password}
-      EXT_STORAGE_CONFIG: ${EXT_STORAGE_CONFIG:-}
+      # Optional: auto-create external storage mounts on boot (up to 3 slots;
+      # empty _MOUNT = skip). Driven from .env.
+      EXT_STORAGE_1_MOUNT: ${EXT_STORAGE_1_MOUNT:-}
+      EXT_STORAGE_1_BACKEND: ${EXT_STORAGE_1_BACKEND:-cidgravity}
+      EXT_STORAGE_1_AUTH: ${EXT_STORAGE_1_AUTH:-password::password}
+      EXT_STORAGE_1_CONFIG: ${EXT_STORAGE_1_CONFIG:-}
+      EXT_STORAGE_2_MOUNT: ${EXT_STORAGE_2_MOUNT:-}
+      EXT_STORAGE_2_BACKEND: ${EXT_STORAGE_2_BACKEND:-cidgravity}
+      EXT_STORAGE_2_AUTH: ${EXT_STORAGE_2_AUTH:-password::password}
+      EXT_STORAGE_2_CONFIG: ${EXT_STORAGE_2_CONFIG:-}
+      EXT_STORAGE_3_MOUNT: ${EXT_STORAGE_3_MOUNT:-}
+      EXT_STORAGE_3_BACKEND: ${EXT_STORAGE_3_BACKEND:-cidgravity}
+      EXT_STORAGE_3_AUTH: ${EXT_STORAGE_3_AUTH:-password::password}
+      EXT_STORAGE_3_CONFIG: ${EXT_STORAGE_3_CONFIG:-}
     volumes:
       # Persist the Nextcloud install (config, data, shipped apps) across restarts.
       - nextcloud_data:/var/www/html

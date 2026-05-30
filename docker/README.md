@@ -78,28 +78,37 @@ backend remains).
 - For a quick one-off change to the running instance, use `make docker-occ
   CMD="config:system:set …"` — it takes effect immediately, no recreate.
 
-## Auto-create the external storage
+## Auto-create external storage mounts
 
-Instead of adding the CIDgravity storage by hand in the UI every time, you can
-have one mount created automatically on boot. Set these in `.env`:
+Instead of adding storage by hand in the UI every time, you can have mounts
+created automatically on boot. Define up to 3 in `.env` via indexed slots
+`EXT_STORAGE_<i>_{MOUNT,BACKEND,AUTH,CONFIG}`. `.env.example` ships two by
+default — one `cidgravity` and one `cidgravityGateway`:
 
 ```sh
-EXT_STORAGE_MOUNT=CIDgravity      # mount-point name (empty = don't create)
-EXT_STORAGE_CONFIG=host=https://nextcloud.twinquasar.io secure=true root=PublicFilecoin default_ipfs_gateway=https://ipfs.io/ipfs user=YOUR_USER password=YOUR_PASSWORD
+EXT_STORAGE_1_MOUNT=CIDgravity
+EXT_STORAGE_1_BACKEND=cidgravity
+EXT_STORAGE_1_CONFIG=host=https://nextcloud.twinquasar.io secure=true root=PublicFilecoin default_ipfs_gateway=https://ipfs.io/ipfs user=YOUR_USER password=YOUR_PASSWORD
+
+EXT_STORAGE_2_MOUNT=CIDgravityGateway
+EXT_STORAGE_2_BACKEND=cidgravityGateway
+EXT_STORAGE_2_CONFIG=host=https://gateway.example.com secure=true metadata_endpoint=https://gateway.example.com/metadata default_ipfs_gateway=https://ipfs.io/ipfs auto_create_user_folder=true user=YOUR_USER password=YOUR_PASSWORD
 ```
 
-`EXT_STORAGE_BACKEND` (`cidgravity`) and `EXT_STORAGE_AUTH` (`password::password`)
-default correctly; the config keys match the CIDgravity backend
-([CIDgravityBackendService](../lib/Service/Backend/CIDgravityBackendService.php)).
-The mount is a **system mount applicable to all users** and is created
-idempotently — re-runs leave an existing mount untouched.
+Config keys match the backends
+([CIDgravityBackendService](../lib/Service/Backend/CIDgravityBackendService.php),
+[CIDgravityGatewayBackendService](../lib/Service/Backend/CIDgravityGatewayBackendService.php)).
+`_AUTH` defaults to `password::password`. Each mount is a **system mount
+available to all users** and is created idempotently — existing mounts are kept.
 
 Notes:
-- Leave `EXT_STORAGE_MOUNT` empty to skip and configure manually instead.
-- Values in `EXT_STORAGE_CONFIG` must not contain spaces.
-- Credentials live only in your local (gitignored) `.env`.
-- The mechanism is generic — point `EXT_STORAGE_BACKEND`/`_AUTH`/`_CONFIG` at any
-  external-storage backend to reuse it for another app.
+- Creation stops at the first empty `_MOUNT`, so empty a slot to skip it.
+- Fill in your real credentials / gateway URLs — the defaults are placeholders.
+- Values in `_CONFIG` must not contain spaces. Credentials live only in your
+  local (gitignored) `.env`.
+- Generic — point a slot's `_BACKEND`/`_AUTH`/`_CONFIG` at any external-storage
+  backend to reuse for another app. Need more than 3? Add slots to both `.env`
+  and the `environment:` block in `docker-compose.yml`.
 - Verify with `make docker-occ CMD="files_external:list"`.
 
 ## Minimal instance
