@@ -91,9 +91,9 @@
       "enabled": false
     },
     {
-      "description": "Don't bump the PHP floor — composer.json `php ^8.2` is a deliberate min-version statement tied to the Nextcloud versions we support, not something to drift with each new PHP release.",
-      "matchPackageNames": ["php"],
+      "description": "Don't bump the PHP floor — composer.json `php ^8.2` is a deliberate min-version statement tied to the Nextcloud versions we support, not something to drift with each new PHP release. Match on matchDepNames (not matchPackageNames): the composer manager gives the php constraint packageName `php/php-src`, so matchPackageNames:[\"php\"] never fires; depName stays `php`.",
       "matchManagers": ["composer"],
+      "matchDepNames": ["php"],
       "enabled": false
     },
     {
