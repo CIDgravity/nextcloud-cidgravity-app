@@ -44,7 +44,8 @@
         "@stylistic/**",
         "@vue/eslint-config-typescript",
         "stylelint",
-        "stylelint-**"
+        "stylelint-**",
+        "postcss-html"
       ],
       "groupName": "Lint stack"
     },
@@ -70,7 +71,6 @@
         "url-loader",
         "node-polyfill-webpack-plugin",
         "csp-html-webpack-plugin",
-        "postcss-html",
         "postcss-selector-parser"
       ],
       "groupName": "Build chain"
@@ -110,6 +110,11 @@
       "description": "Cap node-polyfill-webpack-plugin: @nextcloud/webpack-vue-config@7.0.2 peer-pins it to exact 4.0.0. Remove this rule when upstream relaxes the peer.",
       "matchPackageNames": ["node-polyfill-webpack-plugin"],
       "allowedVersions": "<4.1.0"
+    },
+    {
+      "description": "Cap postcss-html and stylelint-config-recommended-vue at <2: @nextcloud/stylelint-config@3.2.2 peer-pins stylelint-config-recommended-vue ^1.6.1, which in turn peer-pins postcss-html ^1. Both must move to v2 together, and only once upstream relaxes the peer. Remove this rule then.",
+      "matchPackageNames": ["postcss-html", "stylelint-config-recommended-vue"],
+      "allowedVersions": "<2"
     },
     {
       "description": "Cap typescript at <7: TS 7 is the native (Go) port and no longer exposes the JS compiler API (require('typescript') only returns `version`). typescript-eslint (pulled in by @nextcloud/eslint-config) peer-pins typescript <6.1.0 and crashes on load with TS 7; ts-loader also needs the JS API. Remove this rule when typescript-eslint supports TS 7.",
