@@ -38,7 +38,7 @@
 		"extends @nextcloud/browserslist-config"
 	],
 	"engines": {
-		"node": ">=24.21.0",
+		"node": ">=24.22.0",
 		"npm": ">=12.2.0"
 	},
 	"devDependencies": {
