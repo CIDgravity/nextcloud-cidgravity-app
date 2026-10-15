@@ -1,7 +1,7 @@
 {
 	"name": "cidgravity",
 	"description": "An application to display files/directory metadata on decentralized web for CIDgravity storage files",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"author": "CIDgravity <support@cidgravity.com>",
 	"bugs": {
 		"url": "https://github.com/CIDgravity/nextcloud-cidgravity-app"
