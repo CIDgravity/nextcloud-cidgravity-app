@@ -117,6 +117,11 @@
       "allowedVersions": "<4.1.0"
     },
     {
+      "description": "Cap typescript at <7: TS 7 is the native (Go) port and no longer exposes the JS compiler API (require('typescript') only returns `version`). typescript-eslint (pulled in by @nextcloud/eslint-config) peer-pins typescript <6.1.0 and crashes on load with TS 7; ts-loader also needs the JS API. Remove this rule when typescript-eslint supports TS 7.",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
+    },
+    {
       "description": "Don't auto-PR Vue or @nextcloud/{vue,dialogs} majors — they carry breaking changes that need coordinated source rewrites.",
       "matchPackageNames": ["vue", "@nextcloud/vue", "@nextcloud/dialogs"],
       "matchUpdateTypes": ["major"],
