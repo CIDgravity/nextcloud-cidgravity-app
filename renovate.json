@@ -32,8 +32,8 @@
       "groupName": "@nextcloud packages"
     },
     {
-      "description": "Group all Babel packages (single monorepo, lockstep releases).",
-      "matchPackageNames": ["@babel/**", "babel-loader"],
+      "description": "Group all Babel packages (single monorepo, lockstep releases). @nextcloud/babel-config is included because it peer-pins the @babel/core major — listed after the @nextcloud group so this groupName wins.",
+      "matchPackageNames": ["@babel/**", "babel-loader", "@nextcloud/babel-config"],
       "groupName": "Babel"
     },
     {
@@ -100,11 +100,6 @@
       "description": "Cap phpunit at <12: phpunit 12 needs PHP ^8.3 and phpunit 13 needs PHP ^8.4. Our floor is PHP 8.2. Revisit when raising the PHP minimum (which would also require bumping info.xml min-version).",
       "matchPackageNames": ["phpunit/phpunit"],
       "allowedVersions": "<12"
-    },
-    {
-      "description": "Cap sass-loader: @nextcloud/webpack-vue-config@7.0.2 peer-pins sass-loader ^16. Remove this rule when upstream relaxes the peer.",
-      "matchPackageNames": ["sass-loader"],
-      "allowedVersions": "<17"
     },
     {
       "description": "Cap webpack-cli: @nextcloud/webpack-vue-config@7.0.2 peer-pins webpack-cli ^6. Remove this rule when upstream relaxes the peer.",
