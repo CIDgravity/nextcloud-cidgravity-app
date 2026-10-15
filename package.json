@@ -56,7 +56,7 @@
 		"eslint": "^10.12.0",
 		"eslint-webpack-plugin": "^6.0.0",
 		"node-polyfill-webpack-plugin": "^4.0.0",
-		"postcss-html": "^1.8.1",
+		"postcss-html": "^2.0.0",
 		"postcss-selector-parser": "^7.1.6",
 		"sass": "^1.105.1",
 		"sass-loader": "^17.0.1",
